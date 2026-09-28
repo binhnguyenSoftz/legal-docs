@@ -1,0 +1,80 @@
+doc_type: can-cuoc
+version: 1
+title: Căn cước công dân / Chứng minh nhân dân
+source_form: "[CẦN XÁC NHẬN] CMND theo NĐ 05/1999/NĐ-CP; CCCD mã vạch (TT 61/2015/TT-BCA); CCCD gắn chip (TT 06/2021/TT-BCA); thẻ căn cước (TT 16/2024/TT-BCA)"
+pages: 2                           # Mặt trước, mặt sau
+
+issue_date:
+  source: persona.the.ngay_cap
+
+# Thế hệ thẻ lấy theo thẻ người nộp đang dùng (persona.the.loai, suy ra từ ngày cấp).
+variants:
+  by: persona.the.loai
+  cases:
+    - {name: cmnd-9, equals: cmnd-9}
+    - {name: cccd-ma-vach, equals: cccd-ma-vach}
+    - {name: cccd-chip, equals: cccd-chip}
+    - {name: the-can-cuoc, equals: the-can-cuoc}
+
+render:
+  page: card
+  age: [0, 0.35]
+  print_font: sans
+
+fields:
+  - {name: so, label: Số, type: id_number, source: persona.the.so, fill: printed}
+  - name: ho_ten
+    label: Họ và tên
+    type: person_name
+    source: persona.ho_ten
+    transform: upper
+    fill: printed
+    by_variant: {cmnd-9: {fill: typed}}
+  - name: ngay_sinh
+    label: Ngày sinh
+    type: date
+    source: persona.ngay_sinh
+    fill: printed
+    by_variant: {cmnd-9: {fill: typed}}
+  - {name: gioi_tinh, label: Giới tính, type: text, source: persona.gioi_tinh, fill: printed,
+     variants: [cccd-ma-vach, cccd-chip, the-can-cuoc]}
+  - {name: quoc_tich, label: Quốc tịch, type: text, source: persona.quoc_tich, fill: printed,
+     variants: [cccd-ma-vach, cccd-chip, the-can-cuoc]}
+  - name: que_quan
+    label: Quê quán / Nguyên quán
+    type: address
+    gen: address_at
+    params: {source: persona.que_quan_parts, kind: place}
+    fill: printed
+    variants: [cmnd-9, cccd-ma-vach, cccd-chip]
+    by_variant: {cmnd-9: {fill: typed}}
+  - name: noi_thuong_tru
+    label: Nơi thường trú / Nơi cư trú
+    type: address
+    gen: address_at
+    params: {source: persona.noi_thuong_tru_parts}
+    fill: printed
+    by_variant: {cmnd-9: {fill: typed}}
+  - name: noi_dang_ky_khai_sinh
+    label: Nơi đăng ký khai sinh
+    type: address
+    gen: address_at
+    params: {source: persona.que_quan_parts, kind: place}
+    fill: printed
+    variants: [the-can-cuoc]
+  - {name: ngay_het_han, label: Có giá trị đến, type: date, source: persona.the.ngay_het_han, fill: printed,
+     null_text: Không thời hạn, variants: [cccd-ma-vach, cccd-chip, the-can-cuoc]}
+  - {name: dan_toc, label: Dân tộc, type: text, source: persona.dan_toc, fill: typed, variants: [cmnd-9]}
+  - {name: ton_giao, label: Tôn giáo, type: text, source: persona.ton_giao, fill: typed, variants: [cmnd-9]}
+  - {name: dac_diem, label: Đặc điểm nhân dạng, type: text, source: persona.the.dac_diem, fill: printed,
+     variants: [cmnd-9, cccd-ma-vach, cccd-chip], by_variant: {cmnd-9: {fill: typed}}}
+  - name: ngay_cap
+    label: Ngày cấp
+    type: date
+    source: persona.the.ngay_cap
+    fill: printed
+    by_variant: {cmnd-9: {fill: typed, format: "Ngày %d tháng %m năm %Y"}}
+  - {name: noi_cap, label: Nơi cấp, type: text, source: persona.the.noi_cap, fill: printed, transform: upper}
+  - {name: mrz_1, label: MRZ dòng 1, type: mrz, source: persona.the.mrz.0, fill: printed, variants: [cccd-chip, the-can-cuoc]}
+  - {name: mrz_2, label: MRZ dòng 2, type: mrz, source: persona.the.mrz.1, fill: printed, variants: [cccd-chip, the-can-cuoc]}
+  - {name: mrz_3, label: MRZ dòng 3, type: mrz, source: persona.the.mrz.2, fill: printed, variants: [cccd-chip, the-can-cuoc]}

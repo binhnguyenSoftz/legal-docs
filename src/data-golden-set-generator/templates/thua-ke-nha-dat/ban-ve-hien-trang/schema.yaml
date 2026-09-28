@@ -1,0 +1,62 @@
+doc_type: ban-ve-hien-trang
+version: 1
+title: Bản vẽ hiện trạng nhà ở, đất ở
+source_form: "[CẦN XÁC NHẬN] Bản vẽ do đơn vị đo đạc lập, không có mẫu thống nhất; bố cục theo thông lệ: sơ đồ, bảng diện tích, khung tên"
+pages: 1
+
+# Đo vẽ gần ngày nộp hồ sơ.
+issue_date:
+  offset_days: [-120, -10]
+
+render:
+  page: a4
+  paper: white
+  age: [0, 0.15]
+  print_font: sans
+
+fields:
+  - {name: chu_su_dung, label: Chủ sử dụng, type: person_name, source: people.nguoi_mat.ho_ten, transform: upper, fill: printed}
+  - name: dia_chi
+    label: Địa chỉ thửa đất
+    type: address
+    gen: address_at
+    params: {source: property.dia_chi_parts}
+    fill: printed
+  - {name: so_thua, label: Thửa đất số, type: text, source: property.so_thua, fill: printed}
+  - {name: to_ban_do, label: Tờ bản đồ số, type: text, source: property.to_ban_do, fill: printed}
+  - {name: dien_tich, label: Diện tích khuôn viên, type: area, source: property.dien_tich, format: vn_decimal, suffix: " m²", fill: printed}
+  - {name: dien_tich_xay_dung, label: Diện tích xây dựng, type: area, source: property.nha.dien_tich_xay_dung,
+     format: vn_decimal, suffix: " m²", fill: printed}
+  - {name: dien_tich_san, label: Tổng diện tích sàn, type: area, source: property.nha.dien_tich_san,
+     format: vn_decimal, suffix: " m²", fill: printed}
+  - {name: so_tang, label: Số tầng, type: number, source: property.nha.so_tang, fill: printed}
+  - {name: ket_cau, label: Kết cấu, type: text, source: property.nha.ket_cau, fill: printed}
+  - {name: ty_le, label: Tỷ lệ, type: text, gen: choice, params: {values: ["1/100", "1/200", "1/200", "1/250"]}, fill: printed}
+
+  # Trong hình vẽ: số đo 4 cạnh và tứ cận, theo thứ tự mặt tiền, phải, mặt hậu, trái.
+  - {name: canh_1, label: Cạnh mặt tiền, type: length, source: property.canh.0, format: vn_decimal, digits: 2, fill: printed}
+  - {name: canh_2, label: Cạnh phải, type: length, source: property.canh.1, format: vn_decimal, digits: 2, fill: printed}
+  - {name: canh_3, label: Cạnh mặt hậu, type: length, source: property.canh.2, format: vn_decimal, digits: 2, fill: printed}
+  - {name: canh_4, label: Cạnh trái, type: length, source: property.canh.3, format: vn_decimal, digits: 2, fill: printed}
+  - {name: giap_1, label: Giáp mặt tiền, type: text, source: property.tu_can_canh.0, fill: printed}
+  - {name: giap_2, label: Giáp bên phải, type: text, source: property.tu_can_canh.1, fill: printed}
+  - {name: giap_3, label: Giáp mặt hậu, type: text, source: property.tu_can_canh.2, fill: printed}
+  - {name: giap_4, label: Giáp bên trái, type: text, source: property.tu_can_canh.3, fill: printed}
+
+  # Khung tên
+  - name: don_vi_do_ve
+    label: Đơn vị đo vẽ
+    type: organization
+    gen: choice
+    params:
+      # Tên giả lập, không lấy tên doanh nghiệp thật.
+      values: ["CÔNG TY TNHH ĐO ĐẠC ĐỊA CHÍNH AN PHÚ THỊNH (GIẢ LẬP)", "CÔNG TY CP TƯ VẤN ĐO ĐẠC MINH TÂM (GIẢ LẬP)",
+               "CÔNG TY TNHH TRẮC ĐỊA HOÀNG NGUYÊN (GIẢ LẬP)"]
+    fill: printed
+  - {name: nguoi_do_ve, label: Người đo vẽ, type: person_name, gen: person_name, fill: printed}
+  - {name: nguoi_kiem_tra, label: Người kiểm tra, type: person_name, gen: person_name, fill: printed}
+  - {name: ngay_do_ve, label: Ngày đo vẽ, type: date, source: doc.issue_date, fill: printed}
+
+decorations:
+  - {kind: signature, anchor: nguoi_do_ve}
+  - {kind: stamp, anchor: don_vi_do_ve}

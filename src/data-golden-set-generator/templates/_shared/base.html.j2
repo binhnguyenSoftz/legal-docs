@@ -1,0 +1,102 @@
+{#- Layout chung cho mọi giấy tờ. Template giấy tờ: {% extends "_shared/base.html.j2" %}
+    Mỗi trang: <section {{ page_attrs() }}> để có khổ giấy, màu giấy, vết ố, nếp gấp theo doc.render. -#}
+{%- macro field(name, cls="", min_width=None) -%}
+{%- set f = fields[name] -%}
+<span class="field {{ f.fill }} {{ cls }}" data-field="{{ name }}"
+      {%- if min_width %} style="min-width: {{ min_width }}"{% endif %}>{{ f.text }}</span>
+{%- endmacro -%}
+
+{#- Trường nằm trong hình vẽ SVG (bản vẽ, sơ đồ thửa đất). -#}
+{%- macro svg_field(name, x, y, size=11, anchor="middle", rotate=0, cls="") -%}
+{%- set f = fields[name] -%}
+<text class="{{ f.fill }} {{ cls }}" data-field="{{ name }}" x="{{ x }}" y="{{ y }}" font-size="{{ size }}" text-anchor="{{ anchor }}"
+      {%- if rotate %} transform="rotate({{ rotate }} {{ x }} {{ y }})"{% endif %}>{{ f.text }}</text>
+{%- endmacro -%}
+
+{%- macro checkbox(name) -%}
+{%- set f = fields[name] -%}
+<span class="checkbox" data-field="{{ name }}">{{ "✓" if f.value else "" }}</span>
+{%- endmacro -%}
+
+{%- macro quoc_hieu() -%}
+<div class="quoc-hieu">
+  <div class="qh1">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</div>
+  <div class="qh2">Độc lập - Tự do - Hạnh phúc</div>
+  <div class="qh-line"></div>
+</div>
+{%- endmacro -%}
+
+{#- Dấu giả lập đặt tuyệt đối trong trang, thường đè lên chữ ký và một phần chữ. -#}
+{%- macro stamp_at(key, left, top, size=120) -%}
+<div class="stamp-wrap" style="left: {{ left }}; top: {{ top }};">{{ stamp(doc.doc_id ~ key, size) }}</div>
+{%- endmacro -%}
+
+{#- Sơ đồ thửa đất. poly: tọa độ mét (mặt tiền ở dưới). edge_fields: tên trường số đo 4 cạnh theo thứ tự
+    mặt tiền, phải, mặt hậu, trái. side_fields: tên trường tứ cận cùng thứ tự (tùy chọn). -#}
+{%- macro parcel(poly, width, height, edge_fields, side_fields=None, north=0, house=None, size=12, margin=70) -%}
+{%- set xs = [] %}{% set ys = [] %}{% for p in poly %}{% set _ = xs.append(p[0]) %}{% set _ = ys.append(p[1]) %}{% endfor -%}
+{%- set minx = xs | min %}{% set maxx = xs | max %}{% set maxy = ys | max -%}
+{%- set s = [(width - 2 * margin) / (maxx - minx), (height - 2 * margin) / maxy] | min -%}
+{%- set ox = (width - (maxx - minx) * s) / 2 - minx * s %}{% set oy = (height + maxy * s) / 2 -%}
+{%- set pts = [] %}{% for p in poly %}{% set _ = pts.append((ox + p[0] * s, oy - p[1] * s)) %}{% endfor -%}
+<svg width="{{ width }}" height="{{ height }}" viewBox="0 0 {{ width }} {{ height }}" style="color: var(--ink)">
+  <defs><pattern id="hatch" width="8" height="8" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
+    <line x1="0" y1="0" x2="0" y2="8" stroke="currentColor" stroke-width="0.7" opacity="0.6"/></pattern></defs>
+  <polygon points="{% for x, y in pts %}{{ '%.1f,%.1f ' % (x, y) }}{% endfor %}" fill="none" stroke="currentColor" stroke-width="1.8"/>
+  {%- if house %}
+  {%- set cx = (pts | sum(attribute=0)) / 4 %}{% set cy = (pts | sum(attribute=1)) / 4 %}{% set k = house ** 0.5 * 0.96 %}
+  <polygon points="{% for x, y in pts %}{{ '%.1f,%.1f ' % (cx + (x - cx) * k, cy + (y - cy) * k) }}{% endfor %}" fill="url(#hatch)" stroke="currentColor" stroke-width="1"/>
+  {%- endif %}
+  {%- for i in range(4) %}
+  {%- set a = pts[i] %}{% set b = pts[(i + 1) % 4] %}{% set mx = (a[0] + b[0]) / 2 %}{% set my = (a[1] + b[1]) / 2 -%}
+  {%- set dx = [0, 1, 0, -1][i] %}{% set dy = [1, 0, -1, 0][i] %}{% set rot = [0, -90, 0, -90][i] -%}
+  {{ svg_field(edge_fields[i], "%.1f" % (mx + dx * 14), "%.1f" % (my + dy * 16 + (4 if i % 2 else 0)), size, "middle", rot) }}
+  {%- if side_fields %}
+  {{ svg_field(side_fields[i], "%.1f" % (mx + dx * 42), "%.1f" % (my + dy * 44), size - 1, "middle", rot, "italic") }}
+  {%- endif %}
+  {%- endfor %}
+  <g transform="translate({{ width - 30 }},34) rotate({{ north }})">
+    <polygon points="0,-20 7,8 0,3 -7,8" fill="currentColor"/>
+    <text x="0" y="-24" font-size="12" text-anchor="middle" fill="currentColor" transform="rotate({{ -north }} 0 -28)">B</text>
+  </g>
+</svg>
+{%- endmacro -%}
+
+{%- macro page_attrs(extra="") -%}
+{%- set r = doc.render -%}
+{%- set layers = [] -%}
+{%- for s in r.stains -%}
+{%- set _ = layers.append("radial-gradient(circle at %d%% %d%%, rgba(150,110,40,%s) 0, rgba(150,110,40,%s) %dmm, transparent %dmm)" % (s.x, s.y, s.a, s.a * 0.4, s.r, s.r + 3)) -%}
+{%- endfor -%}
+{%- for y in r.folds -%}
+{%- set _ = layers.append("linear-gradient(to bottom, transparent %s%%, rgba(90,70,40,0.18) %s%%, rgba(255,255,255,0.25) %s%%, transparent %s%%)" % (y - 0.3, y, y + 0.15, y + 0.4)) -%}
+{%- endfor -%}
+{%- if r.paper == "ruled" -%}
+{%- set _ = layers.append("repeating-linear-gradient(to bottom, transparent 0, transparent calc(var(--rule) - 1px), rgba(70,110,170,0.45) calc(var(--rule) - 1px), rgba(70,110,170,0.45) var(--rule))") -%}
+{%- endif -%}
+class="page {{ r.page }} {{ extra }}" style="{% if layers %}background-image: {{ layers | join(', ') }};{% endif %}"
+{%- endmacro -%}
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>{{ doc.title }}</title>
+<style>
+{% for f in font_faces %}
+@font-face { font-family: "{{ f.family }}"; font-weight: {{ f.weight }}; src: url("{{ f.src }}"); }
+{%- endfor %}
+{%- set hw_font = doc.render.hw_font or style.hw_font %}
+{%- if hw_font %}
+@font-face { font-family: "HW"; src: url("{{ hw_font }}"); }
+{%- endif %}
+@page { size: {{ doc.render.w_mm }}mm {{ doc.render.h_mm }}mm; margin: 0; }
+{% include "_shared/base.css" %}
+:root { --hw-color: {{ doc.render.hw_ink }}; --hw-size: {{ doc.render.hw_size }}pt; --paper: {{ doc.render.paper_color }};
+        --ink: {{ doc.render.ink }}; --print-font: "{{ doc.render.print_font }}"; --rule: 8mm; }
+</style>
+{% block head %}{% endblock %}
+</head>
+<body>
+{% block body %}{% endblock %}
+</body>
+</html>

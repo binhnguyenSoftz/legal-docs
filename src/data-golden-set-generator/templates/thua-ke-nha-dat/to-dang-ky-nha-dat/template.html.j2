@@ -1,0 +1,51 @@
+{% extends "_shared/base.html.j2" %}
+{#- danh-may: cả tờ gõ máy chữ, chữ hơi lệch dòng, mực không đều. viet-tay: mẫu in sẵn, điền tay trên dòng chấm. -#}
+{% block head %}
+<style>
+.tw { font-family: "Cousine", "Courier New", monospace; font-size: 11.5pt; line-height: 1.65; }
+.tw .field { border-bottom: none; min-width: 0; padding: 0; }
+.tw .row:nth-child(3n) { transform: translateY(0.4px) rotate(-0.08deg); }
+.tw .row:nth-child(4n+1) { opacity: 0.86; }
+.xn { margin-top: 8mm; display: flex; justify-content: space-between; }
+.xn > div { width: 48%; text-align: center; position: relative; }
+</style>
+{% endblock %}
+{% block body %}
+{%- set tw = doc.variant == "danh-may" -%}
+<section {{ page_attrs("tw" if tw else "") }}>
+  {%- if tw %}
+  <div class="center bold">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM<br>Độc lập - Tự do - Hạnh phúc<br>---oOo---</div>
+  {%- else %}{{ quoc_hieu() }}{% endif %}
+  <div class="title">TỜ KHAI ĐĂNG KÝ NHÀ Ở, ĐẤT Ở</div>
+  <div class="row">1. Họ và tên chủ hộ: {{ field("chu_ho", "", "70mm") }} &nbsp; Năm sinh: {{ field("nam_sinh", "", "18mm") }}</div>
+  <div class="row">&nbsp;&nbsp;&nbsp;Số CMND: {{ field("cmnd", "", "40mm") }} &nbsp; Nghề nghiệp: {{ field("nghe_nghiep", "", "35mm") }}</div>
+  <div class="row">2. Địa chỉ thường trú: {{ field("dia_chi_thuong_tru", "", "110mm") }}</div>
+  <div class="row">3. Địa chỉ nhà, đất kê khai: {{ field("dia_chi_nha_dat", "", "105mm") }}</div>
+  <div class="row">&nbsp;&nbsp;&nbsp;Thửa số: {{ field("so_thua", "", "20mm") }} &nbsp; Tờ bản đồ số: {{ field("to_ban_do", "", "20mm") }}</div>
+  <div class="row">4. Nguồn gốc nhà, đất: {{ field("nguon_goc", "", "110mm") }}</div>
+  <div class="row">5. Diện tích đất: {{ field("dien_tich_dat", "", "30mm") }} &nbsp; Diện tích xây dựng: {{ field("dien_tich_xay_dung", "", "30mm") }}</div>
+  <div class="row">&nbsp;&nbsp;&nbsp;Kết cấu nhà: {{ field("ket_cau", "", "80mm") }} &nbsp; Số tầng: {{ field("so_tang", "", "10mm") }}</div>
+  <div class="row">6. Tứ cận:</div>
+  <div class="row">&nbsp;&nbsp;&nbsp;- Đông giáp: {{ field("tu_can_dong", "", "90mm") }}</div>
+  <div class="row">&nbsp;&nbsp;&nbsp;- Tây giáp: {{ field("tu_can_tay", "", "90mm") }}</div>
+  <div class="row">&nbsp;&nbsp;&nbsp;- Nam giáp: {{ field("tu_can_nam", "", "90mm") }}</div>
+  <div class="row">&nbsp;&nbsp;&nbsp;- Bắc giáp: {{ field("tu_can_bac", "", "90mm") }}</div>
+  <div class="row italic">Tôi xin cam đoan những điều khai trên là đúng sự thật, nếu sai tôi hoàn toàn chịu trách nhiệm trước pháp luật.</div>
+  <div class="xn">
+    <div>
+      <div class="bold">XÁC NHẬN CỦA UBND PHƯỜNG</div>
+      <div style="text-align: left;">{{ field("xac_nhan", "plain") }}</div>
+      <div>{{ field("ngay_xac_nhan", "plain") }}</div>
+      {{ signature(doc.doc_id ~ "xn", 120, 45) }}
+      <div>{{ field("nguoi_xac_nhan", "plain") }}</div>
+      <div class="stamp-wrap" style="left: 12mm; top: 18mm;">{{ stamp(doc.doc_id ~ "xn", 115) }}</div>
+    </div>
+    <div>
+      <div class="italic">{{ field("ngay_khai", "plain") }}</div>
+      <div class="bold">NGƯỜI KHAI</div>
+      {{ signature(doc.doc_id ~ "nk", 120, 45) }}
+      <div>{{ field("chu_ho", "plain") }}</div>
+    </div>
+  </div>
+</section>
+{% endblock %}

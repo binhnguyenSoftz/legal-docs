@@ -1,0 +1,137 @@
+{% extends "_shared/base.html.j2" %}
+{#- Thẻ 2 mặt theo 4 thế hệ (doc.variant). Quốc huy, ảnh chân dung, chip, QR là hình giả lập,
+    không mô phỏng chi tiết bảo an của thẻ thật. Mỗi mặt có dòng chữ nhỏ "MẪU GIẢ LẬP". -#}
+{% block head %}
+<style>
+.card-bg { position: absolute; inset: 0; border-radius: 3mm; overflow: hidden; }
+.v-cmnd-9 .card-bg { background: linear-gradient(135deg, #e3eef5, #f4efe0 60%, #dbe9df); }
+.v-cccd-ma-vach .card-bg, .v-cccd-chip .card-bg { background: linear-gradient(160deg, #eaf1fb, #fbf6ec 55%, #e6f2ea); }
+.v-the-can-cuoc .card-bg { background: linear-gradient(160deg, #f6ecef, #fbf6ec 55%, #eaf0fa); }
+.abs { position: absolute; }
+.hdr { left: 0; right: 0; top: 1.6mm; text-align: center; font-weight: bold; font-size: 5.4pt; line-height: 1.2; }
+.card-title { color: #b01c1c; font-size: 8.5pt; font-weight: bold; }
+.en { font-weight: normal; font-style: italic; font-size: 4.6pt; color: #333; }
+.emblem { width: 10mm; height: 10mm; border-radius: 50%; background: radial-gradient(circle, #d8262b 55%, #e8b92f 57%, #d8262b 70%); color: #ffd84a; text-align: center; line-height: 10mm; font-size: 12pt; }
+.photo { width: 18mm; height: 23mm; background: #cfd5dc; border: 0.3mm solid #9aa4ae; overflow: hidden; }
+.lbl { color: #333; }
+.val { font-weight: bold; color: #111; }
+.lines .row { margin: 0.35mm 0; }
+.mrz { left: 3mm; right: 3mm; bottom: 1.6mm; font-family: "Cousine", monospace; font-size: 7.3pt; line-height: 1.12; letter-spacing: 0.35mm; }
+.chip { width: 11mm; height: 8.5mm; border-radius: 1.5mm; background: linear-gradient(135deg, #d9b45a, #f4dc93 50%, #c89b3c); border: 0.2mm solid #9c7a2e; }
+.finger { width: 14mm; height: 16mm; border: 0.2mm solid #888; text-align: center; font-size: 4.5pt; color: #444; }
+.marker { right: 2mm; bottom: 0.4mm; font-size: 3.6pt; color: #b01c1c; letter-spacing: 0.2mm; }
+.field.cmnd-line { min-width: 30mm; }
+.so-cmnd { color: #c3161c; font-size: 10pt; font-weight: bold; letter-spacing: 0.4mm; }
+</style>
+{% endblock %}
+{% macro photo() -%}
+<div class="photo"><svg width="100%" height="100%" viewBox="0 0 60 78"><circle cx="30" cy="28" r="13" fill="#8e98a3"/><path d="M5,78 C8,55 20,47 30,47 C40,47 52,55 55,78 Z" fill="#8e98a3"/></svg></div>
+{%- endmacro %}
+{% block body %}
+{%- set v = doc.variant -%}
+{#- ======================= MẶT TRƯỚC ======================= -#}
+<section {{ page_attrs("v-" ~ v) }}>
+  <div class="card-bg"></div>
+  {%- if v == "cmnd-9" %}
+  <div class="abs" style="left: 3mm; top: 4mm;"><div class="emblem">★</div></div>
+  <div class="abs" style="left: 2.5mm; top: 18mm;">{{ photo() }}</div>
+  <div class="abs center" style="left: 22mm; right: 2mm; top: 3mm;">
+    <div class="bold" style="font-size: 6pt;">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</div>
+    <div class="card-title" style="font-size: 8pt;">GIẤY CHỨNG MINH NHÂN DÂN</div>
+    <div class="so-cmnd">SỐ <span data-field="so">{{ fields.so.text }}</span></div>
+  </div>
+  <div class="abs lines" style="left: 22mm; right: 2mm; top: 17mm; font-size: 6.3pt;">
+    <div class="row">Họ tên {{ field("ho_ten", "cmnd-line") }}</div>
+    <div class="row">Sinh ngày {{ field("ngay_sinh", "cmnd-line") }}</div>
+    <div class="row">Nguyên quán {{ field("que_quan", "cmnd-line") }}</div>
+    <div class="row">Nơi ĐKHK thường trú {{ field("noi_thuong_tru", "cmnd-line") }}</div>
+  </div>
+  {%- else %}
+  <div class="abs hdr">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM<br><span style="font-size: 5pt;">Độc lập - Tự do - Hạnh phúc</span><br>
+    <span class="en">SOCIALIST REPUBLIC OF VIET NAM - Independence - Freedom - Happiness</span></div>
+  <div class="abs center" style="left: 0; right: 0; top: 9.4mm;">
+    <span class="card-title">{{ "CĂN CƯỚC" if v == "the-can-cuoc" else "CĂN CƯỚC CÔNG DÂN" }}</span>
+    <span class="en">{{ "IDENTITY CARD" if v == "the-can-cuoc" else "Citizen Identity Card" }}</span></div>
+  <div class="abs" style="left: 4mm; top: 3mm;"><div class="emblem" style="width: 8mm; height: 8mm; line-height: 8mm; font-size: 9pt;">★</div></div>
+  {%- if v == "cccd-chip" %}<div class="abs" style="right: 3mm; top: 2.5mm;">{{ qr(doc.doc_id, 42) }}</div>{% endif %}
+  {%- if v == "the-can-cuoc" %}<div class="abs" style="left: 4mm; top: 15mm;"><div class="chip"></div></div>{% endif %}
+  <div class="abs" style="left: 3mm; top: {{ '25mm' if v == 'the-can-cuoc' else '15mm' }};">{{ photo() }}</div>
+  <div class="abs lines" style="left: 23mm; right: 2mm; top: 14.5mm;">
+    {%- if v == "the-can-cuoc" %}
+    <div class="row"><span class="lbl">Số định danh cá nhân / <i>Personal identification number</i></span><br>
+      <span class="val" style="font-size: 9pt;" data-field="so">{{ fields.so.text }}</span></div>
+    <div class="row"><span class="lbl">Họ, chữ đệm và tên khai sinh / <i>Full name</i></span><br>{{ field("ho_ten", "plain val") }}</div>
+    <div class="row"><span class="lbl">Ngày, tháng, năm sinh / <i>Date of birth</i></span><br>{{ field("ngay_sinh", "plain val") }}</div>
+    <div class="row"><span class="lbl">Giới tính / <i>Sex</i>:</span> {{ field("gioi_tinh", "plain val") }}
+      &nbsp; <span class="lbl">Quốc tịch / <i>Nationality</i>:</span> {{ field("quoc_tich", "plain val") }}</div>
+    {%- else %}
+    <div class="row"><span class="lbl">Số / <i>No.</i>:</span> <span class="val" style="font-size: 9pt;" data-field="so">{{ fields.so.text }}</span></div>
+    <div class="row"><span class="lbl">Họ và tên / <i>Full name</i>:</span><br>{{ field("ho_ten", "plain val") }}</div>
+    <div class="row"><span class="lbl">Ngày sinh / <i>Date of birth</i>:</span> {{ field("ngay_sinh", "plain val") }}</div>
+    <div class="row"><span class="lbl">Giới tính / <i>Sex</i>:</span> {{ field("gioi_tinh", "plain val") }}
+      &nbsp; <span class="lbl">Quốc tịch / <i>Nationality</i>:</span> {{ field("quoc_tich", "plain val") }}</div>
+    <div class="row"><span class="lbl">Quê quán / <i>Place of origin</i>:</span><br>{{ field("que_quan", "plain val") }}</div>
+    <div class="row"><span class="lbl">Nơi thường trú / <i>Place of residence</i>:</span><br>{{ field("noi_thuong_tru", "plain val") }}</div>
+    {%- endif %}
+  </div>
+  {%- if v != "the-can-cuoc" %}
+  <div class="abs" style="left: 2mm; top: 39mm; width: 21mm; font-size: 4.6pt; line-height: 1.2;">
+    Có giá trị đến:<br><i>Date of expiry</i><br>{{ field("ngay_het_han", "plain val") }}</div>
+  {%- endif %}
+  {%- endif %}
+  <div class="abs marker">MẪU GIẢ LẬP</div>
+</section>
+{#- ======================= MẶT SAU ======================= -#}
+<section {{ page_attrs("v-" ~ v) }}>
+  <div class="card-bg"></div>
+  {%- if v == "cmnd-9" %}
+  <div class="abs" style="left: 2.5mm; top: 3mm; width: 38mm;">
+    <table class="grid" style="font-size: 5.8pt;">
+      <tr><td>Dân tộc</td><td>{{ field("dan_toc", "plain") }}</td></tr>
+      <tr><td>Tôn giáo</td><td>{{ field("ton_giao", "plain") }}</td></tr>
+    </table>
+    <div class="bold center" style="font-size: 5.6pt; margin-top: 1mm;">DẤU VẾT RIÊNG VÀ DỊ HÌNH</div>
+    <div style="font-size: 5.8pt;">{{ field("dac_diem", "plain") }}</div>
+  </div>
+  <div class="abs" style="left: 3mm; top: 33mm; display: flex; gap: 3mm;">
+    <div class="finger">NGÓN TRỎ TRÁI</div><div class="finger">NGÓN TRỎ PHẢI</div></div>
+  <div class="abs center" style="left: 42mm; right: 2mm; top: 10mm; font-size: 6pt;">
+    {{ field("ngay_cap", "plain") }}<br>
+    <span class="bold">GIÁM ĐỐC</span><br><span class="bold" data-field="noi_cap">{{ fields.noi_cap.text }}</span>
+    <div style="height: 16mm; position: relative;">{{ signature(doc.doc_id ~ "gd", 80, 30) }}</div>
+  </div>
+  <div class="stamp-wrap" style="left: 44mm; top: 17mm;">{{ stamp(doc.doc_id ~ "back", 70) }}</div>
+  {%- else %}
+  {%- if v == "cccd-ma-vach" %}<div class="abs" style="left: 3mm; top: 3mm;">{{ barcode(doc.doc_id, 150, 20) }}</div>{% endif %}
+  {%- if v == "cccd-chip" %}<div class="abs" style="left: 5mm; top: 4mm;"><div class="chip"></div></div>{% endif %}
+  {%- if v == "the-can-cuoc" %}<div class="abs" style="right: 3mm; top: 2.5mm;">{{ qr(doc.doc_id, 46) }}</div>{% endif %}
+  <div class="abs lines" style="left: {{ '3mm' if v == 'the-can-cuoc' else '26mm' }}; right: {{ '18mm' if v == 'the-can-cuoc' else '2mm' }}; top: {{ '3mm' if v == 'the-can-cuoc' else '9.5mm' }}; font-size: 5.8pt;">
+    {%- if v == "the-can-cuoc" %}
+    <div class="row"><span class="lbl">Nơi cư trú / <i>Place of residence</i>:</span><br>{{ field("noi_thuong_tru", "plain val") }}</div>
+    <div class="row"><span class="lbl">Nơi đăng ký khai sinh / <i>Place of birth</i>:</span><br>{{ field("noi_dang_ky_khai_sinh", "plain val") }}</div>
+    <div class="row"><span class="lbl">Ngày, tháng, năm cấp / <i>Date of issue</i>:</span> {{ field("ngay_cap", "plain val") }}</div>
+    <div class="row"><span class="lbl">Ngày, tháng, năm hết hạn / <i>Date of expiry</i>:</span> {{ field("ngay_het_han", "plain val") }}</div>
+    <div class="row bold"><span data-field="noi_cap">{{ fields.noi_cap.text }}</span></div>
+    {%- else %}
+    <div class="row"><span class="lbl">Đặc điểm nhân dạng / <i>Personal identification</i>:</span><br>{{ field("dac_diem", "plain val") }}</div>
+    <div class="row"><span class="lbl">Ngày, tháng, năm / <i>Date, month, year</i>:</span> {{ field("ngay_cap", "plain val") }}</div>
+    <div class="row bold" style="font-size: 5.2pt;"><span data-field="noi_cap">{{ fields.noi_cap.text }}</span></div>
+    <div style="height: 8mm; position: relative;">{{ signature(doc.doc_id ~ "ct", 70, 26) }}</div>
+    <div class="stamp-wrap" style="left: -4mm; top: 12mm;">{{ stamp(doc.doc_id ~ "ct", 56) }}</div>
+    {%- endif %}
+  </div>
+  {%- if v != "the-can-cuoc" %}
+  <div class="abs" style="left: 3mm; top: {{ '16mm' if v == 'cccd-chip' else '10mm' }}; display: flex; flex-direction: column; gap: 1mm;">
+    <div class="finger" style="width: 11mm; height: 9mm;">Ngón trỏ trái</div><div class="finger" style="width: 11mm; height: 9mm;">Ngón trỏ phải</div></div>
+  {%- endif %}
+  {%- if v in ("cccd-chip", "the-can-cuoc") %}
+  <div class="abs mrz">
+    <div data-field="mrz_1">{{ fields.mrz_1.text }}</div>
+    <div data-field="mrz_2">{{ fields.mrz_2.text }}</div>
+    <div data-field="mrz_3">{{ fields.mrz_3.text }}</div>
+  </div>
+  {%- endif %}
+  {%- endif %}
+  <div class="abs marker">MẪU GIẢ LẬP</div>
+</section>
+{% endblock %}

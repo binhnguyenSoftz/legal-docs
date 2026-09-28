@@ -1,0 +1,70 @@
+doc_type: so-ho-khau
+version: 1
+title: Sổ hộ khẩu (giấy chứng nhận hộ khẩu thường trú)
+source_form: "[CẦN XÁC NHẬN] Sổ hộ khẩu gia đình mẫu HK10 (Bộ Công an). Hết giá trị từ 01/01/2023 (Luật Cư trú 2020)"
+pages: "2 + số nhân khẩu"          # Trang chủ hộ; mỗi nhân khẩu một trang; trang điều chỉnh, thay đổi
+
+issue_date:
+  source: timeline.ngay_cap_ho_khau
+
+# Người đứng tên mất trước khi sổ hết giá trị thì có dòng xóa đăng ký thường trú.
+variants:
+  by: timeline.ngay_mat
+  cases:
+    - {name: da-xoa-ten, before: "2023-01-01"}
+    - {name: chua-xoa-ten}
+
+render:
+  page: so
+  paper: aged
+  age: [0.3, 0.9]
+
+fields:
+  - {name: so_so, label: Sổ số, type: text, gen: pattern, params: {pattern: "######"}, fill: handwritten}
+  - {name: chu_ho, label: Họ và tên chủ hộ, type: person_name, source: people.nguoi_mat.ho_ten, transform: upper, fill: handwritten}
+  - name: dia_chi
+    label: Nơi thường trú
+    type: address
+    gen: address_at
+    params: {source: people.nguoi_mat.noi_thuong_tru_parts}
+    fill: handwritten
+  - {name: ngay_cap, label: Ngày cấp, type: date, source: doc.issue_date, format: "ngày %d tháng %m năm %Y", fill: handwritten}
+  - {name: truong_cong_an, label: Trưởng công an, type: person_name, gen: person_name, fill: handwritten}
+
+  # Trang điều chỉnh, thay đổi
+  - {name: xoa_ten_ho_ten, label: Người bị xóa đăng ký thường trú, type: person_name, source: people.nguoi_mat.ho_ten,
+     fill: handwritten, variants: [da-xoa-ten]}
+  - {name: xoa_ten_ngay_mat, label: Ngày chết, type: date, source: timeline.ngay_mat, fill: handwritten, variants: [da-xoa-ten]}
+  - {name: xoa_ten_ngay, label: Ngày xóa đăng ký, type: date, gen: date_offset, params: {source: timeline.ngay_mat, days: [10, 90]},
+     fill: handwritten, variants: [da-xoa-ten]}
+
+# Mỗi nhân khẩu một trang. tv1 luôn là chủ hộ (người đứng tên nhà đất).
+groups:
+  - name: tv
+    items: people.ho_khau
+    max: 6
+    fields:
+      - {name: ho_ten, label: Họ và tên, type: person_name, source: item.ho_ten, transform: upper, fill: handwritten}
+      - {name: ngay_sinh, label: Ngày sinh, type: date, source: item.ngay_sinh, fill: handwritten}
+      - {name: gioi_tinh, label: Giới tính, type: text, source: item.gioi_tinh, fill: handwritten}
+      - name: nguyen_quan
+        label: Nguyên quán
+        type: address
+        gen: address_at
+        params: {source: item.que_quan_parts, kind: place}
+        fill: handwritten
+      - {name: dan_toc, label: Dân tộc, type: text, source: item.dan_toc, fill: handwritten}
+      - {name: ton_giao, label: Tôn giáo, type: text, source: item.ton_giao, fill: handwritten}
+      - {name: cmnd, label: Số CMND, type: id_number, source: item.cmnd, fill: handwritten}
+      - {name: quan_he, label: Quan hệ với chủ hộ, type: text, source: item.quan_he, fill: handwritten}
+      - name: nghe_nghiep
+        label: Nghề nghiệp, nơi làm việc
+        type: text
+        gen: choice
+        params: {values: [Buôn bán, Công nhân, Cán bộ, Nội trợ, Học sinh, Lao động tự do, Hưu trí]}
+        fill: handwritten
+        blank_rate: 0.2
+
+decorations:
+  - {kind: signature, anchor: truong_cong_an}
+  - {kind: stamp, anchor: truong_cong_an}

@@ -1,0 +1,23 @@
+[project]
+name = "data-golden-set-generator"
+dynamic = ["version"]
+requires-python = ">=3.11"
+dependencies = [
+  "faker>=30",
+  "jinja2>=3.1",
+  "pyyaml>=6",
+]
+
+[project.optional-dependencies]
+render = ["playwright>=1.47"]
+noise = ["opencv-python-headless>=4.9", "numpy>=1.26", "augraphy>=8.2"]
+dev = ["pytest>=8"]
+
+[tool.setuptools]
+packages = ["generator", "generator.fields"]
+
+[tool.setuptools.dynamic]
+version = {attr = "generator.GENERATOR_VERSION"}
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

@@ -1,0 +1,82 @@
+{% extends "_shared/base.html.j2" %}
+{#- Mẫu cũ 4 trang. Viền hoa văn giả lập bằng viền kép; không mô phỏng phôi thật. -#}
+{% block head %}
+<style>
+.frame { position: absolute; inset: 10mm 10mm 10mm 14mm; border: 4px double #b0485a; outline: 1px solid #d99aa6; outline-offset: -8px; }
+.pink { color: #a3223d; }
+.big-title { text-align: center; font-weight: bold; font-size: 17pt; line-height: 1.35; color: #a3223d; margin: 18mm 0 10mm; }
+.sec { font-weight: bold; margin-top: 6mm; }
+.sign { width: 95mm; margin-left: auto; text-align: center; position: relative; margin-top: 8mm; }
+table.grid td { height: 11mm; }
+</style>
+{% endblock %}
+{% block body %}
+{#- Trang 1: bìa + chủ sở hữu -#}
+<section {{ page_attrs() }}>
+  <div class="frame"></div>
+  {{ quoc_hieu() }}
+  <div class="big-title">GIẤY CHỨNG NHẬN<br>QUYỀN SỞ HỮU NHÀ Ở<br>VÀ QUYỀN SỬ DỤNG ĐẤT Ở</div>
+  <div class="center">Số: <span class="field printed plain bold pink" data-field="so_gcn">{{ fields.so_gcn.text }}</span></div>
+  <div class="center" style="margin-bottom: 10mm;">Hồ sơ gốc số: {{ field("ho_so_goc", "", "25mm") }}</div>
+  <div class="row">Chủ sở hữu nhà ở và sử dụng đất ở: {{ field("chu_so_huu", "", "70mm") }}</div>
+  <div class="row">Năm sinh: {{ field("nam_sinh", "", "25mm") }} &nbsp; Số CMND: {{ field("cmnd", "", "45mm") }}</div>
+  <div class="row">Và vợ/chồng: {{ field("vo_chong", "", "100mm") }}</div>
+  <div class="row">Địa chỉ thường trú: {{ field("dia_chi_thuong_tru", "", "120mm") }}</div>
+</section>
+
+{#- Trang 2: nhà ở, đất ở, chữ ký cấp -#}
+<section {{ page_attrs() }}>
+  <div class="frame"></div>
+  <div class="sec">I. NHÀ Ở</div>
+  <div class="row">Địa chỉ: {{ field("dia_chi_nha", "", "140mm") }}</div>
+  <table class="grid">
+    <tr><th>Tổng diện tích sử dụng</th><th>Diện tích xây dựng</th><th>Kết cấu nhà</th><th>Số tầng</th><th>Năm xây dựng</th></tr>
+    <tr><td>{{ field("dien_tich_su_dung", "plain") }}</td><td>{{ field("dien_tich_xay_dung", "plain") }}</td>
+        <td>{{ field("ket_cau", "plain") }}</td><td>{{ field("so_tang", "plain") }}</td><td>{{ field("nam_xay_dung", "plain") }}</td></tr>
+  </table>
+  <div class="sec">II. ĐẤT Ở</div>
+  <table class="grid">
+    <tr><th>Thửa đất số</th><th>Tờ bản đồ số</th><th>Diện tích</th><th>Hình thức sử dụng</th></tr>
+    <tr><td>{{ field("so_thua", "plain") }}</td><td>{{ field("to_ban_do", "plain") }}</td><td>{{ field("dien_tich", "plain") }}</td>
+        <td>{{ field("hinh_thuc", "plain") }}</td></tr>
+  </table>
+  <div class="sign">
+    <div class="italic">{{ fields.dia_chi_nha.value.split(", ")[-1] }}, {{ field("ngay_cap", "plain") }}</div>
+    <div class="bold">{{ field("chuc_vu_ky", "plain") }}</div>
+    {{ signature(doc.doc_id ~ "ky", 160, 60) }}
+    <div class="bold">{{ field("nguoi_ky", "plain") }}</div>
+    <div class="stamp-wrap" style="left: -6mm; top: 8mm;">{{ stamp(doc.doc_id ~ "ky", 130) }}</div>
+  </div>
+</section>
+
+{#- Trang 3: sơ đồ nhà đất -#}
+<section {{ page_attrs() }}>
+  <div class="frame"></div>
+  <div class="title pink">SƠ ĐỒ NHÀ Ở, ĐẤT Ở</div>
+  <div class="center">
+    {{ parcel(property.polygon, 560, 720, ["canh_1", "canh_2", "canh_3", "canh_4"], north=property.goc_bac,
+              house=property.nha.ty_le, size=14) }}
+  </div>
+  <div class="small italic">Ghi chú: phần gạch chéo là diện tích xây dựng. Kích thước ghi bằng mét.</div>
+</section>
+
+{#- Trang 4: những thay đổi sau khi cấp giấy chứng nhận -#}
+<section {{ page_attrs() }}>
+  <div class="frame"></div>
+  <div class="title pink">NHỮNG THAY ĐỔI SAU KHI CẤP GIẤY CHỨNG NHẬN</div>
+  <table class="grid">
+    <tr><th style="width: 30mm;">Ngày, tháng, năm</th><th>Nội dung thay đổi và cơ sở pháp lý</th><th style="width: 40mm;">Xác nhận của cơ quan có thẩm quyền</th></tr>
+    {%- set filled = [] %}{% for i in (1, 2) %}{% if fields["bd%d_noi_dung" % i].text %}{% set _ = filled.append(i) %}{% endif %}{% endfor %}
+    {%- for i in filled %}
+    {%- set nd = "bd%d_noi_dung" % i %}{% set ng = "bd%d_ngay" % i %}
+    <tr style="height: 28mm;">
+      <td>{{ field(ng, "plain") }}</td>
+      <td>{{ field(nd, "plain") }}</td>
+      <td style="position: relative;">{{ signature(doc.doc_id ~ nd, 110, 45) }}
+        <div class="stamp-wrap" style="left: 2mm; top: -3mm;">{{ stamp(doc.doc_id ~ nd, 95) }}</div></td>
+    </tr>
+    {%- endfor %}
+    {%- for _ in range(6 - filled | length) %}<tr style="height: 22mm;"><td></td><td></td><td></td></tr>{% endfor %}
+  </table>
+</section>
+{% endblock %}

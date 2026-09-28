@@ -1,0 +1,67 @@
+# Cấu hình một thủ tục.
+# Đặt tại templates/<procedure>/procedure.yaml.
+
+procedure: example                 # Trùng tên thư mục
+title: Thủ tục ví dụ
+legal_basis:                       # Căn cứ, để chuyên viên đối chiếu quy tắc sinh với quy định thật
+  - "[CẦN XÁC NHẬN] Nghị định ..., Điều ..."
+
+# Ràng buộc với persona của hồ sơ (ca hợp lệ).
+persona:
+  age: [18, 70]                    # Tuổi tại ngày nộp
+  gender: any                      # any | male | female
+
+submit_date: ["2025-07-01", "2026-06-30"]
+
+documents:
+  - doc_type: don-de-nghi-example
+    required: true
+  - doc_type: giay-xac-nhan-example
+    required: true
+
+# Quy tắc nghiệp vụ. Mã R dùng trong lý do của ground truth và nên khớp mã ràng buộc trong tài liệu nghiệp vụ.
+rules:
+  - id: R01
+    text: Hồ sơ phải có đủ giấy tờ bắt buộc
+  - id: R02
+    text: Thông tin nhân thân trên các giấy tờ phải khớp nhau
+  - id: R03
+    text: Người đề nghị phải từ đủ 18 tuổi
+
+# Phân bố nhãn khi sinh. Tổng = 1.
+mix:
+  valid: 0.5
+  invalid: 0.5
+
+# Ca lỗi có chủ đích. Mỗi ca ghi rõ quyết định kỳ vọng và quy tắc vi phạm.
+# kind: missing_document | field_conflict | field_value | date_order | persona_override
+mutations:
+  - id: M01
+    kind: missing_document
+    weight: 1
+    params: {doc_type: giay-xac-nhan-example}
+    expect: {decision: request_supplement, rule: R01}
+
+  - id: M02
+    kind: field_conflict           # Một giấy tờ ghi khác persona -> mâu thuẫn chéo (AIP-010)
+    weight: 2
+    params:
+      doc_type: giay-xac-nhan-example
+      field: ngay_sinh
+      perturb: date_shift          # date_shift | typo_name | swap_digits | other_address
+    expect: {decision: request_supplement, rule: R02}
+
+  - id: M03
+    kind: persona_override         # Không đủ điều kiện: sinh persona vi phạm ngay từ đầu
+    weight: 1
+    params: {age: [15, 17]}
+    expect: {decision: reject, rule: R03}
+
+  - id: M04
+    kind: date_order               # Ngày ký giấy xác nhận sau ngày nộp
+    weight: 1
+    params:
+      doc_type: giay-xac-nhan-example
+      field: ngay_ky
+      after: dossier.submit_date
+    expect: {decision: request_supplement, rule: R02}

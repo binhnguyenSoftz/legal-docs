@@ -1,0 +1,69 @@
+{% extends "_shared/base.html.j2" %}
+{#- Hai biến thể: giấy chứng tử cũ (khung viền, điền tay trên dòng chấm) và trích lục khai tử (in máy). -#}
+{% block head %}
+<style>
+.frame { position: absolute; inset: 12mm 12mm 12mm 18mm; border: 3px double currentColor; }
+.hdr-left { text-align: center; font-size: 11pt; }
+.hdr { display: flex; justify-content: space-between; align-items: flex-start; }
+.hdr .quoc-hieu { margin: 0; white-space: nowrap; }
+.hdr-left { width: 62mm; }
+.sign { width: 80mm; margin-left: auto; text-align: center; position: relative; margin-top: 6mm; }
+.sign .signature { margin: 3mm auto; }
+.lbl { display: inline-block; min-width: 45mm; }
+.tl .lbl { min-width: 52mm; }
+</style>
+{% endblock %}
+{% block body %}
+{%- set old = doc.variant == "giay-chung-tu" -%}
+<section {{ page_attrs() }}>
+  {%- if old %}<div class="frame"></div>{% endif %}
+  <div class="hdr">
+    <div class="hdr-left">
+      <div>ỦY BAN NHÂN DÂN</div>
+      <div class="small">{{ field("noi_dang_ky", "plain") }}</div>
+      <div>Số: {{ field("so", "", "18mm") }}</div>
+      <div>Quyển số: {{ field("quyen_so", "", "14mm") }}</div>
+    </div>
+    {{ quoc_hieu() }}
+  </div>
+
+  {%- if old %}
+  <div class="title" style="font-size: 18pt; margin-top: 10mm;">GIẤY CHỨNG TỬ</div>
+  <div class="row">Họ và tên: {{ field("ho_ten", "", "100mm") }}</div>
+  <div class="row">Giới tính: {{ field("gioi_tinh", "", "25mm") }} &nbsp; Ngày, tháng, năm sinh: {{ field("ngay_sinh", "", "35mm") }}</div>
+  <div class="row">Dân tộc: {{ field("dan_toc", "", "30mm") }} &nbsp; Quốc tịch: {{ field("quoc_tich", "", "40mm") }}</div>
+  <div class="row">Số Giấy CMND: {{ field("so_cmnd", "", "50mm") }}</div>
+  <div class="row">Nơi thường trú/tạm trú cuối cùng: {{ field("noi_cu_tru", "", "150mm") }}</div>
+  <div class="row">Đã chết vào lúc: {{ field("gio_mat", "", "35mm") }}, ngày {{ field("ngay_mat", "", "35mm") }}</div>
+  <div class="row">Nơi chết: {{ field("noi_mat", "", "120mm") }}</div>
+  <div class="row">Nguyên nhân chết: {{ field("nguyen_nhan", "", "110mm") }}</div>
+  <div class="row">Họ tên người đi khai tử: {{ field("nguoi_khai", "", "95mm") }}</div>
+  <div class="row">Quan hệ với người chết: {{ field("quan_he", "", "40mm") }}</div>
+  <div class="row right" style="margin-top: 6mm;">Đăng ký {{ field("ngay_dang_ky", "", "60mm") }}</div>
+  {%- else %}
+  <div class="title" style="font-size: 16pt; margin-top: 10mm; margin-bottom: 1mm;">TRÍCH LỤC KHAI TỬ</div>
+  <div class="center italic" style="margin-bottom: 8mm;">(Bản chính)</div>
+  <div class="tl">
+  <div class="row"><span class="lbl">Họ, chữ đệm, tên:</span>{{ field("ho_ten", "plain bold") }}</div>
+  <div class="row"><span class="lbl">Ngày, tháng, năm sinh:</span>{{ field("ngay_sinh", "plain") }}</div>
+  <div class="row"><span class="lbl">Giới tính:</span>{{ field("gioi_tinh", "plain") }} &nbsp;&nbsp; Dân tộc: {{ field("dan_toc", "plain") }} &nbsp;&nbsp; Quốc tịch: {{ field("quoc_tich", "plain") }}</div>
+  <div class="row"><span class="lbl">Số định danh cá nhân:</span>{{ field("so_dinh_danh", "plain") }}</div>
+  <div class="row"><span class="lbl">Nơi cư trú cuối cùng:</span>{{ field("noi_cu_tru", "plain") }}</div>
+  <div class="row"><span class="lbl">Đã chết vào lúc:</span>{{ field("gio_mat", "plain") }}, ngày {{ field("ngay_mat", "plain") }}</div>
+  <div class="row"><span class="lbl">Nơi chết:</span>{{ field("noi_mat", "plain") }}</div>
+  <div class="row"><span class="lbl">Nguyên nhân chết:</span>{{ field("nguyen_nhan", "plain") }}</div>
+  <div class="row"><span class="lbl">Người đi khai tử:</span>{{ field("nguoi_khai", "plain") }} &nbsp; Quan hệ: {{ field("quan_he", "plain") }}</div>
+  <div class="row"><span class="lbl">Nơi đăng ký khai tử:</span>Ủy ban nhân dân {{ field("noi_dang_ky", "plain") }}</div>
+  <div class="row right italic" style="margin-top: 6mm;">Đăng ký {{ field("ngay_dang_ky", "plain") }}</div>
+  </div>
+  {%- endif %}
+
+  <div class="sign">
+    <div class="bold">{{ field("chuc_vu_ky", "plain") }}</div>
+    <div class="italic small">(Ký, ghi rõ họ tên và đóng dấu)</div>
+    {{ signature(doc.doc_id ~ "ky", 150, 55) }}
+    <div class="bold">{{ field("nguoi_ky", "plain") }}</div>
+    <div class="stamp-wrap" style="left: -8mm; top: 6mm;">{{ stamp(doc.doc_id ~ "ky", 125) }}</div>
+  </div>
+</section>
+{% endblock %}

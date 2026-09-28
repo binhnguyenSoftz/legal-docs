@@ -1,0 +1,11 @@
+{% extends "_shared/base.html.j2" %}
+{% block body %}
+<section class="page">
+  {{ quoc_hieu() }}
+  <div class="title">GIẤY XÁC NHẬN</div>
+  <div class="row">Xác nhận ông/bà: {{ field("ho_ten") }}</div>
+  <div class="row">Sinh ngày: {{ field("ngay_sinh") }}</div>
+  <div class="row">Số định danh cá nhân: {{ field("so_cccd") }}</div>
+  <div class="row" style="text-align:right">{{ field("ngay_ky", min_width="0") }}</div>
+</section>
+{% endblock %}

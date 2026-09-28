@@ -1,0 +1,44 @@
+/* Mỗi trang là một <section class="page"> cố định khổ giấy, để PDF và ảnh chụp từng trang khớp nhau (bbox đúng cho cả hai).
+   Khổ giấy, màu giấy, mực lấy từ doc.render (generator/style.py). */
+html, body { margin: 0; padding: 0; background: #fff; }
+.page { position: relative; width: 210mm; height: 297mm; padding: 20mm 20mm 20mm 30mm; box-sizing: border-box; overflow: hidden;
+        page-break-after: always; break-after: page; background-color: var(--paper); }
+.page:last-child { page-break-after: auto; break-after: auto; }
+.page.card { width: 85.6mm; height: 53.98mm; padding: 0; font-family: "Arimo", "Liberation Sans", sans-serif; font-size: 6.5pt; line-height: 1.25; }
+.page.so { width: 125mm; height: 180mm; padding: 9mm 9mm 9mm 12mm; font-size: 10pt; line-height: 1.45; }
+body { font-family: var(--print-font), "Tinos", "Times New Roman", "Liberation Serif", serif; font-size: 13pt; line-height: 1.5; color: var(--ink); }
+
+.quoc-hieu { text-align: center; margin-bottom: 12pt; }
+.qh1 { font-weight: bold; font-size: 12pt; }
+.qh2 { font-weight: bold; font-size: 13pt; }
+.qh-line { width: 45mm; margin: 2pt auto 0; border-top: 1px solid currentColor; }
+.so .qh1, .so .qh2 { font-size: 10pt; }
+
+.title { text-align: center; font-weight: bold; font-size: 14pt; margin: 12pt 0; }
+.row { margin: 4pt 0; }
+.center { text-align: center; }
+.right { text-align: right; }
+.bold { font-weight: bold; }
+.italic { font-style: italic; }
+.small { font-size: 0.85em; }
+
+/* Ô điền: đường chấm làm nền, giá trị đè lên */
+.field { display: inline-block; min-width: 40mm; border-bottom: 1px dotted #555; padding: 0 2pt; }
+.field.plain { border-bottom: none; min-width: 0; padding: 0; }
+.field.handwritten, .hw { font-family: "HW", cursive; color: var(--hw-color); font-size: var(--hw-size); }
+.field.printed { font-family: inherit; color: var(--ink); }
+.field.typed, .typed { font-family: "Cousine", "Courier New", "Liberation Mono", monospace; color: var(--ink); letter-spacing: 0.02em; }
+svg text.handwritten { font-family: "HW", cursive; fill: var(--hw-color); }
+svg text.printed { fill: var(--ink); }
+svg text.typed { font-family: "Cousine", monospace; fill: var(--ink); }
+
+.checkbox { display: inline-block; width: 11pt; height: 11pt; border: 1px solid currentColor; text-align: center; line-height: 11pt; vertical-align: middle; font-family: "HW", cursive; color: var(--hw-color); }
+
+.signature-box { height: 30mm; }
+.sign-block { display: inline-block; text-align: center; vertical-align: top; }
+.sign-block .signature { display: block; margin: 2mm auto; }
+.stamp-wrap { position: absolute; opacity: 0.85; mix-blend-mode: multiply; pointer-events: none; }
+
+table.grid { border-collapse: collapse; width: 100%; }
+table.grid td, table.grid th { border: 1px solid currentColor; padding: 2pt 4pt; vertical-align: top; }
+table.grid th { font-weight: bold; text-align: center; }

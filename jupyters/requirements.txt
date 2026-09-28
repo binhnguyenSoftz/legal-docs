@@ -1,0 +1,10 @@
+# Python 3.13: paddlepaddle chưa có wheel cho 3.14
+--index-url https://www.paddlepaddle.org.cn/packages/stable/cpu/
+--extra-index-url https://pypi.org/simple
+paddlepaddle==3.4.0
+paddleocr==3.7.0
+jupyterlab>=4.6
+nbconvert
+pandas>=3.0
+matplotlib>=3.11
+rapidfuzz>=3.14

@@ -1,0 +1,57 @@
+doc_type: giay-sang-dat
+version: 1
+title: Giấy sang đất (viết tay)
+source_form: "Không có mẫu. Giấy viết tay giữa bên bán và bên mua"
+pages: 1
+
+issue_date:
+  source: timeline.ngay_sang
+
+render:
+  page: a4
+  paper: ruled
+  age: [0.4, 1.0]
+  folds: [1, 3]
+
+# Bố cục và lời văn tự do do generator/freeform.py ghép, chèn các trường dưới đây vào câu.
+freeform: giay_sang_dat
+
+fields:
+  - {name: ben_ban_goi, label: Xưng hô bên bán, type: text, source: people.ben_ban.xung_ho}
+  - {name: ben_ban_ho_ten, label: Họ tên bên bán, type: person_name, source: people.ben_ban.ho_ten}
+  - {name: ben_ban_nam_sinh, label: Năm sinh bên bán, type: year, source: people.ben_ban.ngay_sinh.year}
+  - {name: ben_ban_cmnd, label: CMND bên bán, type: id_number, source: people.ben_ban.cmnd, blank_rate: 0.3}
+  - name: ben_ban_dia_chi
+    label: Địa chỉ bên bán
+    type: address
+    gen: address_at
+    params: {source: people.ben_ban.noi_thuong_tru_parts}
+  - {name: ben_mua_goi, label: Xưng hô bên mua, type: text, source: people.nguoi_mat.xung_ho}
+  - {name: ben_mua_ho_ten, label: Họ tên bên mua, type: person_name, source: people.nguoi_mat.ho_ten}
+  - {name: ben_mua_nam_sinh, label: Năm sinh bên mua, type: year, source: people.nguoi_mat.ngay_sinh.year}
+  - {name: ben_mua_cmnd, label: CMND bên mua, type: id_number, source: people.nguoi_mat.cmnd, blank_rate: 0.3}
+  - name: ben_mua_dia_chi
+    label: Địa chỉ bên mua
+    type: address
+    gen: address_at
+    params: {source: people.nguoi_mat.noi_thuong_tru_parts}
+  - name: dia_chi_dat
+    label: Địa chỉ thửa đất
+    type: address
+    gen: address_at
+    params: {source: property.dia_chi_parts}
+  - {name: dien_tich, label: Diện tích, type: area, source: property.dien_tich, format: vn_decimal, suffix: "m2"}
+  - {name: rong, label: Chiều ngang, type: length, source: property.canh.0, format: vn_decimal, digits: 2, suffix: "m"}
+  - {name: dai, label: Chiều dài, type: length, source: property.canh.3, format: vn_decimal, digits: 2, suffix: "m"}
+  - {name: tu_can_dong, label: Đông giáp, type: text, source: property.tu_can.Đông}
+  - {name: tu_can_tay, label: Tây giáp, type: text, source: property.tu_can.Tây}
+  - {name: tu_can_nam, label: Nam giáp, type: text, source: property.tu_can.Nam}
+  - {name: tu_can_bac, label: Bắc giáp, type: text, source: property.tu_can.Bắc}
+  - {name: gia, label: Giá sang, type: money, source: property.gia_sang.text}
+  - {name: gia_bang_chu, label: Giá sang bằng chữ, type: money_words, source: property.gia_sang.bang_chu}
+  - {name: noi_lap, label: Nơi lập, type: text, source: property.dia_chi_parts.tinh_cu_ngan}
+  - {name: ngay_lap, label: Ngày lập, type: date, source: doc.issue_date, format: "ngày %d tháng %m năm %Y"}
+  - {name: lam_chung_ho_ten, label: Người làm chứng, type: person_name, source: people.lam_chung.ho_ten, blank_rate: 0.5}
+
+decorations:
+  - {kind: signature, anchor: ben_ban_ho_ten}

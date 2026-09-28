@@ -1,0 +1,90 @@
+doc_type: to-dang-ky-nha-dat
+version: 1
+title: Tờ khai đăng ký nhà ở, đất ở
+source_form: "[CẦN XÁC NHẬN] Tờ khai đăng ký nhà đất những năm 1990 (mỗi địa phương một mẫu). Bố cục dựng theo nội dung thường gặp"
+pages: 1
+
+issue_date:
+  source: timeline.ngay_dang_ky
+
+# Cả tờ đánh máy (máy chữ), hoặc mẫu in sẵn điền tay.
+variants:
+  cases:
+    - {name: danh-may, weight: 0.6}
+    - {name: viet-tay, weight: 0.4}
+
+render:
+  page: a4
+  paper: aged
+  age: [0.55, 1.0]
+  print_font: typewriter
+  folds: [1, 3]
+
+fields:
+  - {name: chu_ho, label: Họ tên chủ hộ, type: person_name, source: people.nguoi_mat.ho_ten, transform: upper,
+     fill: typed, by_variant: {viet-tay: {fill: handwritten}}}
+  - {name: nam_sinh, label: Năm sinh, type: year, source: people.nguoi_mat.ngay_sinh.year, fill: typed,
+     by_variant: {viet-tay: {fill: handwritten}}}
+  - {name: cmnd, label: Số CMND, type: id_number, source: people.nguoi_mat.cmnd, fill: typed, blank_rate: 0.2,
+     by_variant: {viet-tay: {fill: handwritten}}}
+  - name: nghe_nghiep
+    label: Nghề nghiệp
+    type: text
+    gen: choice
+    params: {values: [Buôn bán, Công nhân, Cán bộ, Nội trợ, Lao động tự do, Hưu trí]}
+    fill: typed
+    by_variant: {viet-tay: {fill: handwritten}}
+  - name: dia_chi_thuong_tru
+    label: Địa chỉ thường trú
+    type: address
+    gen: address_at
+    params: {source: people.nguoi_mat.noi_thuong_tru_parts}
+    fill: typed
+    by_variant: {viet-tay: {fill: handwritten}}
+  - name: dia_chi_nha_dat
+    label: Địa chỉ nhà đất
+    type: address
+    gen: address_at
+    params: {source: property.dia_chi_parts}
+    fill: typed
+    by_variant: {viet-tay: {fill: handwritten}}
+  - name: nguon_goc
+    label: Nguồn gốc nhà đất
+    type: free_text
+    gen: template
+    params: {text: "Nhận sang nhượng của {people.ben_ban.xung_ho} {people.ben_ban.ho_ten} năm {timeline.ngay_sang.year} (giấy tay)"}
+    fill: typed
+    by_variant: {viet-tay: {fill: handwritten}}
+  - {name: so_thua, label: Thửa đất số, type: text, source: property.so_thua, fill: typed, blank_rate: 0.5,
+     by_variant: {viet-tay: {fill: handwritten}}}
+  - {name: to_ban_do, label: Tờ bản đồ số, type: text, source: property.to_ban_do, fill: typed, blank_if: so_thua,
+     by_variant: {viet-tay: {fill: handwritten}}}
+  - {name: dien_tich_dat, label: Diện tích đất, type: area, source: property.dien_tich, format: vn_decimal, suffix: " m2",
+     fill: typed, by_variant: {viet-tay: {fill: handwritten}}}
+  - {name: dien_tich_xay_dung, label: Diện tích xây dựng, type: area, source: property.nha.dien_tich_xay_dung,
+     format: vn_decimal, suffix: " m2", fill: typed, by_variant: {viet-tay: {fill: handwritten}}}
+  - {name: ket_cau, label: Kết cấu, type: text, source: property.nha.ket_cau, fill: typed,
+     by_variant: {viet-tay: {fill: handwritten}}}
+  - {name: so_tang, label: Số tầng, type: number, source: property.nha.so_tang, fill: typed,
+     by_variant: {viet-tay: {fill: handwritten}}}
+  - {name: tu_can_dong, label: Đông giáp, type: text, source: property.tu_can.Đông, fill: typed, by_variant: {viet-tay: {fill: handwritten}}}
+  - {name: tu_can_tay, label: Tây giáp, type: text, source: property.tu_can.Tây, fill: typed, by_variant: {viet-tay: {fill: handwritten}}}
+  - {name: tu_can_nam, label: Nam giáp, type: text, source: property.tu_can.Nam, fill: typed, by_variant: {viet-tay: {fill: handwritten}}}
+  - {name: tu_can_bac, label: Bắc giáp, type: text, source: property.tu_can.Bắc, fill: typed, by_variant: {viet-tay: {fill: handwritten}}}
+  - {name: ngay_khai, label: Ngày khai, type: date, source: doc.issue_date, format: "ngày %d tháng %m năm %Y", fill: typed,
+     by_variant: {viet-tay: {fill: handwritten}}}
+
+  # Xác nhận của UBND phường: luôn viết tay
+  - name: xac_nhan
+    label: Nội dung xác nhận
+    type: free_text
+    gen: template
+    params: {text: "Xác nhận {people.nguoi_mat.xung_ho} {people.nguoi_mat.ho_ten} có nhà đất tại địa chỉ trên, sử dụng ổn định, không tranh chấp."}
+    fill: handwritten
+  - {name: ngay_xac_nhan, label: Ngày xác nhận, type: date, gen: date_offset, params: {source: doc.issue_date, days: [3, 30]},
+     format: "ngày %d/%m/%Y", fill: handwritten}
+  - {name: nguoi_xac_nhan, label: Người xác nhận, type: person_name, gen: person_name, fill: handwritten}
+
+decorations:
+  - {kind: signature, anchor: nguoi_xac_nhan}
+  - {kind: stamp, anchor: nguoi_xac_nhan}

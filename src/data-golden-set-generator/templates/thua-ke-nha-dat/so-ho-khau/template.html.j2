@@ -1,0 +1,66 @@
+{% extends "_shared/base.html.j2" %}
+{#- Khổ sổ nhỏ, nhiều trang: trang chủ hộ, mỗi nhân khẩu một trang, trang điều chỉnh thay đổi. Mẫu in sẵn, điền tay. -#}
+{% block head %}
+<style>
+.so .field { min-width: 20mm; }
+.so .title { font-size: 12pt; margin: 4mm 0; }
+.so .row { margin: 1.6mm 0; }
+.pg { position: absolute; bottom: 4mm; left: 0; right: 0; text-align: center; font-size: 8pt; }
+.cover-title { text-align: center; font-weight: bold; font-size: 20pt; margin: 14mm 0 8mm; letter-spacing: 0.5mm; }
+.sign { text-align: center; position: relative; margin-left: 40mm; margin-top: 4mm; }
+table.grid td { font-size: 9pt; height: 14mm; }
+</style>
+{% endblock %}
+{% block body %}
+{#- Trang 1: thông tin sổ và chủ hộ -#}
+<section {{ page_attrs() }}>
+  <div class="center bold small">BỘ CÔNG AN</div>
+  <div class="center bold" style="font-size: 9pt;">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM<br>Độc lập - Tự do - Hạnh phúc</div>
+  <div class="cover-title">SỔ HỘ KHẨU</div>
+  <div class="center">Số: {{ field("so_so", "", "30mm") }}</div>
+  <div class="row" style="margin-top: 8mm;">Họ và tên chủ hộ: {{ field("chu_ho", "", "60mm") }}</div>
+  <div class="row">Nơi thường trú: {{ field("dia_chi", "", "80mm") }}</div>
+  <div class="sign">
+    <div>{{ field("ngay_cap", "plain") }}</div>
+    <div class="bold">TRƯỞNG CÔNG AN</div>
+    {{ signature(doc.doc_id ~ "ca", 110, 42) }}
+    <div>{{ field("truong_cong_an", "plain") }}</div>
+    <div class="stamp-wrap" style="left: 2mm; top: 4mm;">{{ stamp(doc.doc_id ~ "ca", 100) }}</div>
+  </div>
+  <div class="pg">1</div>
+</section>
+
+{#- Mỗi nhân khẩu một trang -#}
+{%- for i in range(1, doc.groups.tv + 1) %}
+{%- set p = "tv%d_" % i %}
+<section {{ page_attrs() }}>
+  <div class="title">{{ "CHỦ HỘ" if i == 1 else "NHÂN KHẨU" }}</div>
+  <div class="row">Họ và tên: {{ field(p ~ "ho_ten", "", "65mm") }}</div>
+  <div class="row">Sinh ngày: {{ field(p ~ "ngay_sinh", "", "28mm") }} &nbsp; Giới tính: {{ field(p ~ "gioi_tinh", "", "12mm") }}</div>
+  <div class="row">Nguyên quán: {{ field(p ~ "nguyen_quan", "", "70mm") }}</div>
+  <div class="row">Dân tộc: {{ field(p ~ "dan_toc", "", "18mm") }} &nbsp; Tôn giáo: {{ field(p ~ "ton_giao", "", "22mm") }}</div>
+  <div class="row">Số CMND: {{ field(p ~ "cmnd", "", "35mm") }}</div>
+  <div class="row">Nghề nghiệp, nơi làm việc: {{ field(p ~ "nghe_nghiep", "", "45mm") }}</div>
+  <div class="row">Quan hệ với chủ hộ: {{ field(p ~ "quan_he", "", "30mm") }}</div>
+  <div class="pg">{{ i + 1 }}</div>
+</section>
+{%- endfor %}
+
+{#- Trang điều chỉnh, thay đổi -#}
+<section {{ page_attrs() }}>
+  <div class="title">ĐIỀU CHỈNH, THAY ĐỔI</div>
+  <table class="grid">
+    <tr><th style="width: 22mm;">Ngày</th><th>Nội dung</th><th style="width: 28mm;">Cán bộ đăng ký</th></tr>
+    {%- if doc.variant == "da-xoa-ten" %}
+    <tr style="height: 26mm;">
+      <td>{{ field("xoa_ten_ngay", "plain") }}</td>
+      <td>Xóa đăng ký thường trú: {{ field("xoa_ten_ho_ten", "plain") }}. Lý do: chết ngày {{ field("xoa_ten_ngay_mat", "plain") }}</td>
+      <td style="position: relative;">{{ signature(doc.doc_id ~ "xoa", 90, 38) }}
+        <div class="stamp-wrap" style="left: -2mm; top: -4mm;">{{ stamp(doc.doc_id ~ "xoa", 80) }}</div></td>
+    </tr>
+    {%- endif %}
+    {%- for _ in range(5) %}<tr><td></td><td></td><td></td></tr>{% endfor %}
+  </table>
+  <div class="pg">{{ doc.groups.tv + 2 }}</div>
+</section>
+{% endblock %}

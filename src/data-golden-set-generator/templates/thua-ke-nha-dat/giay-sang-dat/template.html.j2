@@ -1,0 +1,40 @@
+{% extends "_shared/base.html.j2" %}
+{#- Không có mẫu: duyệt doc.blocks do generator/freeform.py sinh. Cả trang viết tay trên giấy kẻ dòng.
+    Chữ đặt theo bước dòng --rule để nằm trên dòng kẻ. -#}
+{% block head %}
+<style>
+.page.ruled-page { padding: 16mm 14mm 14mm 22mm; line-height: var(--rule); font-family: "HW", cursive; color: var(--hw-color); font-size: var(--hw-size); }
+.ruled-page .field { display: inline; border-bottom: none; min-width: 0; padding: 0; font-size: inherit; }
+.blk { margin: 0; }
+.blk.title { font-weight: bold; font-size: 1.25em; margin: 0; }
+.blk.indent { padding-left: 8mm; }
+.sigs { display: flex; justify-content: space-around; margin-top: var(--rule); }
+.sigs > div { text-align: center; }
+.sigs .signature { display: block; margin: 0 auto; }
+.margin-line { position: absolute; top: 0; bottom: 0; left: 18mm; border-left: 1px solid rgba(200, 60, 60, 0.45); }
+</style>
+{% endblock %}
+{% block body %}
+<section {{ page_attrs("ruled-page") }}>
+  <div class="margin-line"></div>
+  <div style="transform: rotate({{ doc.render.tilt }}deg); transform-origin: top left;">
+  {%- for b in doc.blocks %}
+    {%- if b.kind == "quoc_hieu" %}
+    <div class="blk center">Cộng hòa xã hội chủ nghĩa Việt Nam<br>Độc lập - Tự do - Hạnh phúc</div>
+    {%- elif b.kind == "signatures" %}
+    <div class="sigs">
+      {%- for s in b.signers %}
+      <div><div>{{ s.label }}</div>{{ signature(doc.doc_id ~ s.field, 110, 40) }}{{ field(s.field) }}</div>
+      {%- endfor %}
+    </div>
+    {%- else %}
+    <div class="blk {{ b.kind }} {{ b.align }}{% if b.get("indent") %} indent{% endif %}">
+      {%- for seg in b.segments -%}
+        {%- if "f" in seg %}{{ field(seg.f) }}{% else %}{{ seg.t }}{% endif -%}
+      {%- endfor -%}
+    </div>
+    {%- endif %}
+  {%- endfor %}
+  </div>
+</section>
+{% endblock %}

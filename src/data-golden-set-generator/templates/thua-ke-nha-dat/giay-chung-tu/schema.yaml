@@ -1,0 +1,87 @@
+doc_type: giay-chung-tu
+version: 1
+title: Giấy chứng tử / Trích lục khai tử
+source_form: "[CẦN XÁC NHẬN] Giấy chứng tử theo TT 08.a/2010/TT-BTP (điền tay); Trích lục khai tử theo TT 04/2020/TT-BTP (in máy)"
+pages: 1
+
+# Đăng ký khai tử trong 15 ngày sau khi mất.
+issue_date:
+  source: timeline.ngay_mat
+  offset_days: [1, 15]
+
+# Luật Hộ tịch 2014 có hiệu lực 01/01/2016: sau mốc này cấp trích lục khai tử, in máy.
+variants:
+  by: doc.issue_date
+  cases:
+    - {name: giay-chung-tu, before: "2016-01-01"}
+    - {name: trich-luc-khai-tu}
+
+render:
+  page: a4
+  paper: aged
+  age: [0.05, 0.7]
+  folds: [0, 2]
+
+fields:
+  - {name: so, label: Số, type: text, gen: pattern, params: {pattern: "###"}, fill: handwritten,
+     by_variant: {trich-luc-khai-tu: {fill: printed}}}
+  - {name: quyen_so, label: Quyển số, type: text, gen: pattern, params: {pattern: "0#"}, fill: handwritten,
+     by_variant: {trich-luc-khai-tu: {fill: printed}}}
+  - name: ho_ten
+    label: Họ, chữ đệm, tên
+    type: person_name
+    source: people.nguoi_mat.ho_ten
+    transform: upper
+    fill: handwritten
+    by_variant: {trich-luc-khai-tu: {fill: printed}}
+  - {name: gioi_tinh, label: Giới tính, type: text, source: people.nguoi_mat.gioi_tinh, fill: handwritten,
+     by_variant: {trich-luc-khai-tu: {fill: printed}}}
+  - {name: ngay_sinh, label: Ngày, tháng, năm sinh, type: date, source: people.nguoi_mat.ngay_sinh, fill: handwritten,
+     by_variant: {trich-luc-khai-tu: {fill: printed}}}
+  - {name: dan_toc, label: Dân tộc, type: text, source: people.nguoi_mat.dan_toc, fill: handwritten,
+     by_variant: {trich-luc-khai-tu: {fill: printed}}}
+  - {name: quoc_tich, label: Quốc tịch, type: text, source: people.nguoi_mat.quoc_tich, fill: handwritten,
+     by_variant: {trich-luc-khai-tu: {fill: printed}}}
+  - {name: so_cmnd, label: Số CMND, type: id_number, source: people.nguoi_mat.cmnd, fill: handwritten,
+     variants: [giay-chung-tu]}
+  - {name: so_dinh_danh, label: Số định danh cá nhân, type: id_number, source: people.nguoi_mat.cccd, fill: printed,
+     variants: [trich-luc-khai-tu]}
+  - name: noi_cu_tru
+    label: Nơi cư trú cuối cùng
+    type: address
+    gen: address_at
+    params: {source: people.nguoi_mat.noi_thuong_tru_parts}
+    fill: handwritten
+    by_variant: {trich-luc-khai-tu: {fill: printed}}
+  - {name: gio_mat, label: Giờ chết, type: text, source: people.nguoi_mat.gio_mat, fill: handwritten,
+     by_variant: {trich-luc-khai-tu: {fill: printed}}}
+  - {name: ngay_mat, label: Ngày chết, type: date, source: timeline.ngay_mat, fill: handwritten,
+     by_variant: {trich-luc-khai-tu: {fill: printed}}}
+  - {name: noi_mat, label: Nơi chết, type: text, source: people.nguoi_mat.noi_mat, fill: handwritten,
+     by_variant: {trich-luc-khai-tu: {fill: printed}}}
+  - {name: nguyen_nhan, label: Nguyên nhân chết, type: text, source: people.nguoi_mat.nguyen_nhan, fill: handwritten,
+     blank_rate: 0.2, by_variant: {trich-luc-khai-tu: {fill: printed}}}
+  - {name: nguoi_khai, label: Họ tên người đi khai tử, type: person_name, source: people.nguoi_nop.ho_ten, fill: handwritten,
+     by_variant: {trich-luc-khai-tu: {fill: printed}}}
+  - {name: quan_he, label: Quan hệ với người chết, type: text, gen: const, params: {value: Con},
+     fill: handwritten, by_variant: {trich-luc-khai-tu: {fill: printed}}}
+  - name: noi_dang_ky
+    label: Nơi đăng ký
+    type: address
+    gen: address_at
+    params: {source: people.nguoi_mat.noi_thuong_tru_parts, kind: place}
+    fill: printed
+  - name: ngay_dang_ky
+    label: Ngày đăng ký
+    type: date
+    source: doc.issue_date
+    format: "ngày %d tháng %m năm %Y"
+    fill: handwritten
+    by_variant: {trich-luc-khai-tu: {fill: printed}}
+  - {name: chuc_vu_ky, label: Chức vụ người ký, type: text, gen: choice,
+     params: {values: [CHỦ TỊCH, PHÓ CHỦ TỊCH, "KT. CHỦ TỊCH - PHÓ CHỦ TỊCH"]}, fill: printed}
+  - {name: nguoi_ky, label: Người ký, type: person_name, gen: person_name, fill: printed}
+
+decorations:
+  - {kind: signature, anchor: nguoi_ky}
+  - {kind: stamp, anchor: nguoi_ky}

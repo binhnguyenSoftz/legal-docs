@@ -1,0 +1,295 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ground_truth.json của một hồ sơ",
+  "type": "object",
+  "required": [
+    "dossier_id",
+    "procedure",
+    "seed",
+    "generator_version",
+    "submit_date",
+    "persona",
+    "documents",
+    "decision",
+    "review"
+  ],
+  "properties": {
+    "dossier_id": {
+      "type": "string"
+    },
+    "procedure": {
+      "type": "string"
+    },
+    "seed": {
+      "type": "integer",
+      "description": "Seed riêng của hồ sơ, suy ra từ seed gốc và số thứ tự"
+    },
+    "generator_version": {
+      "type": "string"
+    },
+    "submit_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "persona": {
+      "type": "object",
+      "description": "Giá trị đúng của nhân vật, dùng cho khớp thực thể (AIP-007)"
+    },
+    "people": {
+      "type": "object",
+      "description": "Nhóm người có quan hệ (thủ tục có people: inheritance): nguoi_nop, nguoi_mat, vo_chong, con, ho_khau, ben_ban, lam_chung. Nhãn cho khớp thực thể"
+    },
+    "timeline": {
+      "type": "object",
+      "description": "Các mốc ngày dùng chung giữa giấy tờ: ngay_sang, ngay_dang_ky, ngay_cap_ho_khau, ngay_cap_gcn, ngay_mat"
+    },
+    "property": {
+      "type": "object",
+      "description": "Thửa đất và nhà dùng chung: số thửa, tờ bản đồ, polygon (mét), cạnh, diện tích, tứ cận, giá sang"
+    },
+    "documents": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "doc_id",
+          "doc_type",
+          "schema_version",
+          "fields",
+          "files"
+        ],
+        "properties": {
+          "doc_id": {
+            "type": "string"
+          },
+          "doc_type": {
+            "type": "string"
+          },
+          "schema_version": {
+            "type": "integer"
+          },
+          "variant": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Biến thể mẫu: thế hệ thẻ, mẫu theo thời kỳ, đánh máy/viết tay (xem variants trong schema.yaml)"
+          },
+          "issue_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "render": {
+            "type": "object",
+            "description": "Hình thức bản gốc: page, paper, age (0-1), print_font, folds... (generator/style.py)"
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "name",
+                "type",
+                "value",
+                "text"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string"
+                },
+                "value": {
+                  "description": "Giá trị chuẩn hóa: ngày ISO, bool, chuỗi"
+                },
+                "text": {
+                  "type": "string",
+                  "description": "Chuỗi đúng như in trên giấy (nhãn cho OCR)"
+                },
+                "fill": {
+                  "enum": [
+                    "handwritten",
+                    "printed",
+                    "typed",
+                    "checkbox"
+                  ]
+                },
+                "mutated_by": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "Mã mutation đã sửa trường này"
+                },
+                "bbox": {
+                  "type": "array",
+                  "description": "Tọa độ trên ảnh sạch, đơn vị pixel. Mỗi dòng chữ một box; một trường có thể in ở nhiều chỗ hoặc xuống nhiều dòng",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "page": {
+                        "type": "integer"
+                      },
+                      "x": {
+                        "type": "number"
+                      },
+                      "y": {
+                        "type": "number"
+                      },
+                      "w": {
+                        "type": "number"
+                      },
+                      "h": {
+                        "type": "number"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "files": {
+            "type": "object",
+            "properties": {
+              "pdf": {
+                "type": "string"
+              },
+              "pages": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "noisy": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "page": {
+                      "type": "integer"
+                    },
+                    "level": {
+                      "type": "string"
+                    },
+                    "path": {
+                      "type": "string"
+                    },
+                    "ops": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "bboxes": {
+                      "type": "object",
+                      "description": "name -> mảng bbox của trang này sau biến đổi hình học"
+                    }
+                  }
+                }
+              },
+              "text": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Toàn bộ chữ trên từng trang (innerText), nhãn OCR toàn trang, cần cho giấy tờ không có mẫu"
+              }
+            }
+          }
+        }
+      }
+    },
+    "missing_documents": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "profile": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "description": "Kịch bản biến thể của tập dữ liệu (coverage trong procedure.yaml)",
+      "properties": {
+        "targets": {
+          "type": "object",
+          "description": "Chiều -> giá trị kịch bản, ví dụ {the: cccd-chip, nam_mat: truoc-2016}"
+        },
+        "variants": {
+          "type": "object",
+          "description": "doc_type -> biến thể thực tế"
+        },
+        "unmet": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Chiều không khớp được (tổ hợp không khả thi, ví dụ người dưới 18 tuổi không thể có CCCD mã vạch)"
+        },
+        "attempts": {
+          "type": "integer",
+          "description": "Số lần sinh lại để khớp kịch bản"
+        }
+      }
+    },
+    "decision": {
+      "type": "object",
+      "required": [
+        "label",
+        "reasons"
+      ],
+      "properties": {
+        "label": {
+          "enum": [
+            "approve",
+            "reject",
+            "request_supplement"
+          ]
+        },
+        "reasons": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "rule": {
+                "type": "string"
+              },
+              "mutation": {
+                "type": "string"
+              },
+              "detail": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "review": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "unreviewed",
+            "accepted",
+            "rejected"
+          ]
+        },
+        "reviewer": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "note": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    }
+  }
+}

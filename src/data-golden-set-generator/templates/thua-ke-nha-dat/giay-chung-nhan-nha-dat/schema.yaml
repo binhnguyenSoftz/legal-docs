@@ -1,0 +1,106 @@
+doc_type: giay-chung-nhan-nha-dat
+version: 1
+title: Giấy chứng nhận quyền sở hữu nhà ở và quyền sử dụng đất ở
+source_form: "[CẦN XÁC NHẬN] Mẫu ban hành kèm Nghị định 60/CP ngày 05/7/1994 (giấy hồng)"
+pages: 4                           # Bìa + chủ sở hữu; nhà ở, đất ở; sơ đồ; những thay đổi sau khi cấp
+
+issue_date:
+  source: timeline.ngay_cap_gcn
+
+# Ô điền trên mẫu in sẵn được đánh máy hoặc viết tay.
+variants:
+  cases:
+    - {name: danh-may, weight: 0.6}
+    - {name: viet-tay, weight: 0.4}
+
+render:
+  page: a4
+  paper: aged
+  age: [0.3, 0.9]
+  folds: [1, 2]
+
+fields:
+  - {name: so_gcn, label: Số giấy chứng nhận, type: text, gen: pattern, params: {pattern: "#####"}, fill: printed}
+  - {name: ho_so_goc, label: Hồ sơ gốc số, type: text, gen: pattern, params: {pattern: "####"}, fill: typed,
+     by_variant: {viet-tay: {fill: handwritten}}}
+  - {name: chu_so_huu, label: Chủ sở hữu, type: person_name, source: people.nguoi_mat.ho_ten, transform: upper,
+     fill: typed, by_variant: {viet-tay: {fill: handwritten}}}
+  - {name: nam_sinh, label: Năm sinh, type: year, source: people.nguoi_mat.ngay_sinh.year, fill: typed,
+     by_variant: {viet-tay: {fill: handwritten}}}
+  - {name: cmnd, label: Số CMND, type: id_number, source: people.nguoi_mat.cmnd, fill: typed,
+     by_variant: {viet-tay: {fill: handwritten}}}
+  - {name: vo_chong, label: Vợ/chồng cùng đứng tên, type: person_name, source: people.vo_chong.ho_ten, transform: upper,
+     fill: typed, blank_rate: 0.4, by_variant: {viet-tay: {fill: handwritten}}}
+  - name: dia_chi_thuong_tru
+    label: Địa chỉ thường trú
+    type: address
+    gen: address_at
+    params: {source: people.nguoi_mat.noi_thuong_tru_parts}
+    fill: typed
+    by_variant: {viet-tay: {fill: handwritten}}
+
+  # I. Nhà ở
+  - name: dia_chi_nha
+    label: Địa chỉ nhà
+    type: address
+    gen: address_at
+    params: {source: property.dia_chi_parts}
+    fill: typed
+    by_variant: {viet-tay: {fill: handwritten}}
+  - {name: dien_tich_xay_dung, label: Diện tích xây dựng, type: area, source: property.nha.dien_tich_xay_dung,
+     format: vn_decimal, suffix: " m²", fill: typed, by_variant: {viet-tay: {fill: handwritten}}}
+  - {name: dien_tich_su_dung, label: Tổng diện tích sử dụng, type: area, source: property.nha.dien_tich_san,
+     format: vn_decimal, suffix: " m²", fill: typed, by_variant: {viet-tay: {fill: handwritten}}}
+  - {name: so_tang, label: Số tầng, type: number, source: property.nha.so_tang, fill: typed,
+     by_variant: {viet-tay: {fill: handwritten}}}
+  - {name: ket_cau, label: Kết cấu, type: text, source: property.nha.ket_cau, fill: typed,
+     by_variant: {viet-tay: {fill: handwritten}}}
+  - {name: nam_xay_dung, label: Năm xây dựng, type: number, source: property.nha.nam_xay_dung, fill: typed,
+     blank_rate: 0.3, by_variant: {viet-tay: {fill: handwritten}}}
+
+  # II. Đất ở
+  - {name: so_thua, label: Thửa đất số, type: text, source: property.so_thua, fill: typed, by_variant: {viet-tay: {fill: handwritten}}}
+  - {name: to_ban_do, label: Tờ bản đồ số, type: text, source: property.to_ban_do, fill: typed, by_variant: {viet-tay: {fill: handwritten}}}
+  - {name: dien_tich, label: Diện tích đất, type: area, source: property.dien_tich, format: vn_decimal, suffix: " m²",
+     fill: typed, by_variant: {viet-tay: {fill: handwritten}}}
+  - {name: hinh_thuc, label: Hình thức sử dụng, type: text, source: property.hinh_thuc_su_dung, fill: typed,
+     by_variant: {viet-tay: {fill: handwritten}}}
+
+  - {name: ngay_cap, label: Ngày cấp, type: date, source: doc.issue_date, format: "ngày %d tháng %m năm %Y", fill: typed,
+     by_variant: {viet-tay: {fill: handwritten}}}
+  - {name: chuc_vu_ky, label: Chức vụ người ký, type: text, gen: choice,
+     params: {values: ["TM. ỦY BAN NHÂN DÂN - CHỦ TỊCH", "TM. ỦY BAN NHÂN DÂN - KT. CHỦ TỊCH - PHÓ CHỦ TỊCH"]}, fill: printed}
+  - {name: nguoi_ky, label: Người ký, type: person_name, gen: person_name, fill: printed}
+
+  # Sơ đồ (trang 3): số đo các cạnh, tứ cận
+  - {name: canh_1, label: Cạnh mặt tiền, type: length, source: property.canh.0, format: vn_decimal, digits: 2, fill: handwritten}
+  - {name: canh_2, label: Cạnh phải, type: length, source: property.canh.1, format: vn_decimal, digits: 2, fill: handwritten}
+  - {name: canh_3, label: Cạnh mặt hậu, type: length, source: property.canh.2, format: vn_decimal, digits: 2, fill: handwritten}
+  - {name: canh_4, label: Cạnh trái, type: length, source: property.canh.3, format: vn_decimal, digits: 2, fill: handwritten}
+
+  # Những thay đổi sau khi cấp (trang 4): viết tay, có thể trống
+  - name: bd1_noi_dung
+    label: Nội dung thay đổi 1
+    type: free_text
+    gen: choice
+    params:
+      values: ["Đã nộp lệ phí trước bạ theo quy định", "Đăng ký thế chấp tại Ngân hàng theo hợp đồng thế chấp",
+               "Xóa đăng ký thế chấp", "Cập nhật số nhà theo quyết định đổi số nhà", "Xác nhận hoàn công phần xây dựng thêm"]
+    fill: handwritten
+    blank_rate: 0.25
+  - {name: bd1_ngay, label: Ngày thay đổi 1, type: date, gen: date_between,
+     params: {start: timeline.ngay_cap_gcn, end: timeline.ngay_mat}, fill: handwritten, blank_if: bd1_noi_dung}
+  - name: bd2_noi_dung
+    label: Nội dung thay đổi 2
+    type: free_text
+    gen: choice
+    params:
+      values: ["Xóa đăng ký thế chấp", "Cập nhật diện tích xây dựng theo hiện trạng", "Đính chính số CMND của chủ sở hữu"]
+    fill: handwritten
+    blank_rate: 0.6
+  - {name: bd2_ngay, label: Ngày thay đổi 2, type: date, gen: date_between,
+     params: {start: timeline.ngay_cap_gcn, end: timeline.ngay_mat}, fill: handwritten, blank_if: bd2_noi_dung}
+
+decorations:
+  - {kind: signature, anchor: nguoi_ky}
+  - {kind: stamp, anchor: nguoi_ky}

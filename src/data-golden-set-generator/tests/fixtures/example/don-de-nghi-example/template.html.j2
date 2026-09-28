@@ -1,0 +1,16 @@
+{% extends "_shared/base.html.j2" %}
+{% block body %}
+<section class="page">
+  {{ quoc_hieu() }}
+  <div class="title">ĐƠN ĐỀ NGHỊ</div>
+  <div class="row">Họ, chữ đệm và tên: {{ field("ho_ten", min_width="90mm") }}</div>
+  <div class="row">Ngày, tháng, năm sinh: {{ field("ngay_sinh") }}</div>
+  <div class="row">Số định danh cá nhân: {{ field("so_cccd", min_width="60mm") }}</div>
+  <div class="row">Nơi cư trú: {{ field("noi_cu_tru", min_width="120mm") }}</div>
+  <div class="row">Số điện thoại: {{ field("so_dien_thoai") }}</div>
+  <div class="row">Lý do đề nghị: {{ field("ly_do", min_width="130mm") }}</div>
+  <div class="row">Đã có giấy tờ kèm theo {{ checkbox("da_co_giay_to") }}</div>
+  <div class="row" style="text-align:right">{{ field("ngay_ky", min_width="0") }}</div>
+  <div class="signature-box" id="chu_ky_nguoi_de_nghi"></div>
+</section>
+{% endblock %}

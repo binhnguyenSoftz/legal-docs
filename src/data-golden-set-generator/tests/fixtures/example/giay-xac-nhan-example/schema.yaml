@@ -1,0 +1,10 @@
+doc_type: giay-xac-nhan-example
+version: 1
+title: Giấy xác nhận (ví dụ)
+issue_date:
+  offset_days: [-60, -1]
+fields:
+  - {name: ho_ten, label: Họ và tên, type: person_name, source: persona.ho_ten, fill: printed}
+  - {name: ngay_sinh, label: Ngày sinh, type: date, source: persona.ngay_sinh, fill: printed}
+  - {name: so_cccd, label: Số định danh, type: id_number, source: persona.cccd, fill: printed}
+  - {name: ngay_ky, label: Ngày ký, type: date, source: doc.issue_date, format: "ngày %d tháng %m năm %Y", fill: printed}

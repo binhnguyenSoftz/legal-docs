@@ -1,0 +1,129 @@
+# Schema của một loại giấy tờ.
+# Đặt tại templates/<procedure>/<doc-type>/schema.yaml.
+# Schema này vừa điều khiển việc sinh dữ liệu, vừa là định nghĩa nhãn cho tầng trích xuất (AIP-005).
+
+doc_type: don-de-nghi-example      # Trùng tên thư mục, chữ thường, gạch ngang
+version: 1                         # Tăng khi đổi trường, để ground truth cũ không bị hiểu sai
+title: Đơn đề nghị (ví dụ)
+source_form: "[CẦN XÁC NHẬN] Mẫu số ... ban hành kèm Thông tư ..."
+pages: 1
+
+# Thời điểm lập giấy tờ, tương đối so với ngày nộp hồ sơ (dossier.submit_date).
+# Các trường ngày trong giấy tờ có thể tham chiếu doc.issue_date.
+issue_date:
+  offset_days: [-30, 0]
+
+fields:
+  # --- Lấy từ persona: bảo đảm nhất quán giữa các giấy tờ trong cùng hồ sơ ---
+  - name: ho_ten
+    label: Họ, chữ đệm và tên
+    type: person_name              # Kiểu nhãn cho tầng trích xuất
+    source: persona.ho_ten
+    fill: handwritten              # handwritten | printed | checkbox
+    transform: upper               # Tùy chọn: upper | lower | title
+    required: true
+
+  - name: ngay_sinh
+    label: Ngày, tháng, năm sinh
+    type: date
+    source: persona.ngay_sinh
+    format: "%d/%m/%Y"
+    fill: handwritten
+    required: true
+
+  - name: so_cccd
+    label: Số định danh cá nhân
+    type: id_number
+    source: persona.cccd
+    fill: handwritten
+    required: true
+
+  - name: noi_cu_tru
+    label: Nơi cư trú
+    type: address
+    source: persona.noi_thuong_tru
+    fill: handwritten
+    required: true
+
+  # --- Sinh bằng generator có ràng buộc ---
+  - name: so_dien_thoai
+    label: Số điện thoại
+    type: phone
+    source: persona.dien_thoai
+    fill: handwritten
+    required: false
+    blank_rate: 0.2                # Tỷ lệ bỏ trống (trường không bắt buộc)
+
+  - name: ngay_ky
+    label: Ngày ký
+    type: date
+    source: doc.issue_date
+    format: "ngày %d tháng %m năm %Y"
+    fill: handwritten
+    required: true
+
+  - name: da_co_giay_to
+    label: Đã có giấy tờ kèm theo
+    type: checkbox
+    gen: choice
+    params: {values: [true, false], weights: [0.8, 0.2]}
+    fill: checkbox
+
+  # --- Văn bản tự do: sinh bằng LLM, cache theo seed ---
+  - name: ly_do
+    label: Lý do đề nghị
+    type: free_text
+    gen: llm_text
+    params:
+      prompt: >-
+        Viết lý do đề nghị ngắn (1-2 câu) theo giọng người dân viết đơn,
+        cho thủ tục {procedure_title}. Không nêu họ tên, số giấy tờ.
+      fallback: ["Tôi có nhu cầu làm thủ tục theo quy định."]
+    fill: handwritten
+
+# Vùng không phải trường nhưng cần cho nhiễu (chèn dấu, chữ ký).
+decorations:
+  - kind: signature                # signature | stamp
+    anchor: chu_ky_nguoi_de_nghi   # id phần tử trong template
+    overlap_text_rate: 0.3         # Tỷ lệ đè lên chữ
+
+# ---------------------------------------------------------------------------
+# Khóa mở rộng (ví dụ đầy đủ: templates/thua-ke-nha-dat/*/schema.yaml)
+# ---------------------------------------------------------------------------
+#
+# issue_date:
+#   source: timeline.ngay_mat      # Ngày lập lấy từ ctx thay vì ngày nộp
+#   offset_days: [1, 15]           # Lệch so với source (mặc định [0, 0] khi có source)
+#
+# variants:                        # Biến thể mẫu -> doc.variant, template rẽ nhánh theo đó
+#   by: doc.issue_date             # Có `by`: chọn case đầu tiên khớp (before: ngày | equals: giá trị)
+#   cases:
+#     - {name: giay-chung-tu, before: "2016-01-01"}
+#     - {name: trich-luc-khai-tu}
+#   # Không có `by`: chọn ngẫu nhiên theo weight, ví dụ đánh máy / viết tay:
+#   # cases: [{name: danh-may, weight: 0.6}, {name: viet-tay, weight: 0.4}]
+#
+# render:                          # Hình thức bản gốc (generator/style.py)
+#   page: a4                       # a4 | card | so
+#   paper: aged                    # white | aged | ruled
+#   age: [0.3, 0.9]                # Mức ố vàng, phai mực
+#   print_font: serif              # serif | typewriter | sans
+#   folds: [0, 2]                  # Số nếp gấp
+#
+# groups:                          # Trường lặp theo danh sách: tv1_ho_ten, tv2_ho_ten...
+#   - name: tv
+#     items: people.ho_khau
+#     max: 6
+#     fields: [{name: ho_ten, type: person_name, source: item.ho_ten}]
+#
+# freeform: giay_sang_dat          # Giấy tờ không có mẫu: generator/freeform.py sinh bố cục và lời văn
+#
+# Khóa mở rộng của một trường:
+#   variants: [cmnd-9]             # Trường chỉ có ở các biến thể này
+#   by_variant: {viet-tay: {fill: handwritten}}   # Ghi đè spec theo biến thể
+#   blank_if: bd1_noi_dung         # Trống khi trường kia trống
+#   null_text: Không thời hạn      # Chữ in khi giá trị None
+#   format: vn_decimal | vn_group | vn_words      # Số kiểu Việt Nam: 68,5 | 26.000.000 | Hai mươi sáu triệu
+#   digits: 2, prefix: "", suffix: " m²"
+#   gen: date_offset | address_at | pattern | template | person_name
+#   source: people.nguoi_mat.ngay_sinh.year       # Đường dẫn đi được vào phần tử list (canh.0) và thuộc tính (.year)
