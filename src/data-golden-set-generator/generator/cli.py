@@ -26,7 +26,7 @@ def to_ground_truth(d: dict) -> dict:
         "submit_date": d["submit_date"],
         "persona": d["persona"],
     }
-    for key in ("people", "timeline", "property"):
+    for key in ("people", "timeline", "property", "compensation"):
         if key in d:
             gt[key] = d[key]
     return gt | {
@@ -65,6 +65,10 @@ def index_row(d: dict) -> dict:
         "pages": sum(len(doc["files"].get("pages", [])) for doc in d["documents"]),
         "unmet": ";".join(profile.get("unmet", [])),
     }
+    if "compensation" in d:
+        c = d["compensation"]
+        row |= {"nguon_goc_dat": c["nguon_goc_dat"], "dien_tich_dat": c["dien_tich_dat"],
+                "nhan_khau": c["nhan_khau"], "nguoi_thua_ke": len(c["nguoi_thua_ke"])}
     row |= {f"target:{k}": v for k, v in profile.get("targets", {}).items()}
     row |= {f"variant:{doc['doc_type']}": doc["variant"] or "" for doc in d["documents"]}
     return row

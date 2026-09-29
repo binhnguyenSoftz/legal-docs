@@ -61,4 +61,3 @@ Sơn	0.05
 Danh	0.05
 Tôn Thất	0.05
 Âu Dương	0.02
-Công Tằng Tôn Nữ	0.01

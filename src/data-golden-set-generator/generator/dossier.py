@@ -122,7 +122,7 @@ def _knobs(proc: Procedure, targets: dict[str, str]) -> dict:
     """Kịch bản -> tham số điều hướng generator: thế hệ thẻ, thời kỳ người mất."""
     knobs = {}
     for dim in proc.coverage:
-        if dim["name"] in targets and dim.get("knob") in ("persona.card", "people.nam_mat"):
+        if dim["name"] in targets and dim.get("knob") in ("persona.card", "people.nam_mat", "people.nguon_goc"):
             knobs[dim["knob"]] = targets[dim["name"]]
     return knobs
 
@@ -155,11 +155,12 @@ def _build_once(proc: Procedure, master_seed: int, index: int, attempt: int, tar
         "documents": [],
         "missing_documents": [],
     }
-    if proc.people == "inheritance":
-        fam = people.build(rng, submit_date, person, knobs.get("people.nam_mat"))
+    if proc.people == "deceased_owner":
+        fam = people.build(rng, submit_date, person, knobs.get("people.nam_mat"), knobs.get("people.nguon_goc"))
         dossier.update(fam)
         dossier["property"] = property.build(rng, person["noi_thuong_tru_parts"], fam["timeline"]["ngay_sang"],
                                              fam["timeline"]["ngay_cap_gcn"])
+        dossier["compensation"] = people.compensation(fam, dossier["property"], submit_date)
     elif proc.people:
         raise ValueError(f"{proc.name}: people không hỗ trợ: {proc.people}")
 
@@ -195,6 +196,8 @@ def _mismatches(proc: Procedure, d: dict, targets: dict[str, str]) -> list[str]:
             continue
         expect = dim["values"][targets[dim["name"]]]
         if any(variants.get(t) != v for t, v in expect.items()):
+            bad.append(dim["name"])
+        elif dim.get("knob") == "people.nguon_goc" and people.land_era(d["timeline"]["ngay_sang"]) != targets[dim["name"]]:
             bad.append(dim["name"])
     return bad
 

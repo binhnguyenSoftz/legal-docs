@@ -42,7 +42,7 @@ fields:
 groups:
   - name: tv
     items: people.ho_khau
-    max: 6
+    max: 10
     fields:
       - {name: ho_ten, label: Họ và tên, type: person_name, source: item.ho_ten, transform: upper, fill: handwritten}
       - {name: ngay_sinh, label: Ngày sinh, type: date, source: item.ngay_sinh, fill: handwritten}
@@ -60,10 +60,10 @@ groups:
       - name: nghe_nghiep
         label: Nghề nghiệp, nơi làm việc
         type: text
-        gen: choice
-        params: {values: [Buôn bán, Công nhân, Cán bộ, Nội trợ, Học sinh, Lao động tự do, Hưu trí]}
+        gen: occupation              # Theo tuổi tại ngày cấp sổ
+        params: {person: item}
         fill: handwritten
-        blank_rate: 0.2
+        blank_rate: 0.15
 
 decorations:
   - {kind: signature, anchor: truong_cong_an}

@@ -1,11 +1,11 @@
-"""Thủ tục thừa kế nhà đất: bộ giấy tờ AIP-027 mục 4.2."""
+"""Thủ tục giải tỏa đền bù: bộ giấy tờ AIP-027 mục 4.2."""
 
 import random
 from datetime import date
 
 import pytest
 
-from generator import dossier, spec
+from generator import dossier, people, spec
 from generator.fields import address, cccd, money
 
 DOC_TYPES = {"can-cuoc", "giay-chung-tu", "giay-chung-nhan-nha-dat", "ban-ve-hien-trang",
@@ -14,12 +14,12 @@ DOC_TYPES = {"can-cuoc", "giay-chung-tu", "giay-chung-nhan-nha-dat", "ban-ve-hie
 
 @pytest.fixture(scope="module")
 def proc():
-    return spec.load_procedure("thua-ke-nha-dat")
+    return spec.load_procedure("giai-toa-den-bu")
 
 
 @pytest.fixture(scope="module")
 def dossiers(proc):
-    return [dossier.build(proc, 11, i) for i in range(150)]
+    return [dossier.build(proc, 11, i) for i in range(216)]
 
 
 @pytest.mark.parametrize("n,words", [
@@ -67,8 +67,8 @@ def test_every_dossier_has_all_documents(dossiers):
 
 
 def test_coverage_plan_balanced(proc):
-    plans = [dossier.plan(proc, i) for i in range(36)]
-    assert len({tuple(p.values()) for p in plans}) == 36, "36 hồ sơ đầu phủ hết mọi tổ hợp"
+    plans = [dossier.plan(proc, i) for i in range(108)]
+    assert len({tuple(p.values()) for p in plans}) == 108, "108 hồ sơ đầu phủ hết mọi tổ hợp"
     for dim in proc.coverage:
         counts = [sum(p[dim["name"]] == v for p in plans[:12]) for v in dim["values"]]
         assert max(counts) - min(counts) == 0, f"{dim['name']} lệch trong 12 hồ sơ đầu: {counts}"
@@ -85,9 +85,11 @@ def test_profile_matches_documents(proc, dossiers):
             if doc_type == "can-cuoc" and d["persona"]["the"]["loai"] == cccd.CMND:
                 continue  # Ca lỗi M05 ép CMND, ưu tiên hơn kịch bản
             assert prof["variants"][doc_type] == variant, (d["dossier_id"], doc_type)
-        # Chỉ chấp nhận chưa khớp khi không khả thi: người nộp dưới 18 không thể có CCCD mã vạch (cấp tới 01/2021).
+        # Chỉ chấp nhận chưa khớp khi không khả thi, đều ở ca M07 (người nộp 15-17 tuổi): không thể có CCCD mã vạch
+        # (cấp tới 01/2021), cha mẹ sinh sau 1960 không thể đã mua đất trước 18/12/1980.
+        infeasible = {("the", "cccd-ma-vach"), ("nguon_goc", "truoc-18-12-1980")}
         for dim in prof["unmet"]:
-            assert dim == "the" and prof["targets"]["the"] == "cccd-ma-vach"
+            assert (dim, prof["targets"][dim]) in infeasible
             assert d["decision"]["reasons"][0]["mutation"] == "M07"
 
 
@@ -119,7 +121,7 @@ def test_variants_follow_dates(dossiers):
         seen.add(cc["variant"])
         hk = docs["so-ho-khau"]
         assert hk["variant"] == ("da-xoa-ten" if d["timeline"]["ngay_mat"] < date(2023, 1, 1) else "chua-xoa-ten")
-        assert hk["groups"]["tv"] == min(6, len(d["people"]["ho_khau"]))
+        assert hk["groups"]["tv"] == min(10, len(d["people"]["ho_khau"]))
         assert hk["fields"]["tv1_ho_ten"]["value"] == d["people"]["nguoi_mat"]["ho_ten"]
     assert {"giay-chung-tu", "trich-luc-khai-tu", "cccd-chip", "cccd-ma-vach", "cmnd-9"} <= seen
 
@@ -128,6 +130,8 @@ def test_old_documents_use_old_address(dossiers):
     for d in dossiers:
         parts = d["property"]["dia_chi_parts"]
         for x in d["documents"]:
+            if any(f["mutated_by"] for f in x["fields"].values()):
+                continue  # Ca lỗi M09 cố ý đổi địa chỉ trên bản vẽ
             if x["doc_type"] == "giay-chung-nhan-nha-dat":
                 assert x["fields"]["dia_chi_nha"]["value"] == address.format_old(parts)
             if x["doc_type"] == "ban-ve-hien-trang":
@@ -146,9 +150,10 @@ def test_freeform_fields_are_on_page(dossiers):
 
 
 def test_labels_match_mutations(dossiers):
-    seen = set()
+    seen, labels_seen = set(), set()
     for d in dossiers:
         label, reasons = d["decision"]["label"], d["decision"]["reasons"]
+        labels_seen.add(label)
         if label == "approve":
             assert reasons == [] and d["missing_documents"] == []
             assert all(f["mutated_by"] is None for x in d["documents"] for f in x["fields"].values())
@@ -162,4 +167,51 @@ def test_labels_match_mutations(dossiers):
             gcn = next(x for x in d["documents"] if x["doc_type"] == "giay-chung-nhan-nha-dat")
             bv = next(x for x in d["documents"] if x["doc_type"] == "ban-ve-hien-trang")
             assert gcn["fields"]["dien_tich"]["value"] != bv["fields"]["dien_tich"]["value"]
-    assert seen == {"M02", "M03", "M04", "M05", "M06", "M07"}
+    assert seen == {"M02", "M03", "M04", "M05", "M06", "M07", "M08", "M09"}
+    assert labels_seen <= {"approve", "request_supplement"}
+
+
+def test_diversity(dossiers):
+    """Tập dữ liệu không được lặp lại một nhóm người, một vài địa chỉ."""
+    from generator.fields import dates
+    people_all, provinces, wards, ethnic, relations = [], set(), set(), set(), set()
+    for d in dossiers:
+        p = d["people"]
+        people_all += [p["nguoi_mat"], p["vo_chong"], p["ben_ban"], *p["con"]]
+        a = d["property"]["dia_chi_parts"]
+        provinces.add(a["tinh_cu"])
+        wards.add((a["tinh_cu"], a["huyen_cu"], a["xa_cu"]))
+        ethnic.add(p["nguoi_nop"]["dan_toc"])
+        relations |= {x["quan_he"] for x in p["ho_khau"]}
+        hk = next(x for x in d["documents"] if x["doc_type"] == "so-ho-khau")
+        for k in range(1, hk["groups"]["tv"] + 1):
+            job = hk["fields"][f"tv{k}_nghe_nghiep"]["value"]
+            age = dates.age_on(hk["fields"][f"tv{k}_ngay_sinh"]["value"], hk["issue_date"])
+            assert not (job == "Học sinh" and age >= 18 or job == "Hưu trí" and age < 60), (job, age)
+    names = [x["ho_ten"] for x in people_all]
+    assert len(set(names)) / len(names) > 0.8
+    assert any(len(n.split()) == 4 for n in names)
+    assert len(provinces) >= 40 and len(wards) >= 140
+    assert len(ethnic) >= 3
+    assert {"Con dâu", "Con rể", "Cháu"} & relations
+
+
+def test_land_origin_eras(dossiers):
+    seen = set()
+    for d in dossiers:
+        era = people.land_era(d["timeline"]["ngay_sang"])
+        seen.add(era)
+        if "nguon_goc" not in d["profile"]["unmet"]:
+            assert era == d["profile"]["targets"]["nguon_goc"]
+        assert d["compensation"]["nguon_goc_dat"] == era
+    assert seen == set(people.LAND_ERAS)
+
+
+def test_compensation_ground_truth(dossiers):
+    for d in dossiers:
+        c, p = d["compensation"], d["people"]
+        assert c["nguoi_dung_ten"] == p["nguoi_mat"]["ho_ten"]
+        assert c["nguoi_dai_dien"] == d["persona"]["ho_ten"] in c["nguoi_thua_ke"]
+        assert c["dien_tich_dat"] == d["property"]["dien_tich"] and c["so_thua"] == d["property"]["so_thua"]
+        assert p["nguoi_mat"]["ho_ten"] not in c["nguoi_thua_ke"]
+        assert 1 <= c["nhan_khau"] < len(p["ho_khau"])

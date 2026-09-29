@@ -37,7 +37,7 @@
     },
     "people": {
       "type": "object",
-      "description": "Nhóm người có quan hệ (thủ tục có people: inheritance): nguoi_nop, nguoi_mat, vo_chong, con, ho_khau, ben_ban, lam_chung. Nhãn cho khớp thực thể"
+      "description": "Nhóm người có quan hệ (thủ tục có people: deceased_owner): nguoi_nop, nguoi_mat, vo_chong, con, ho_khau (có con dâu, con rể, cháu), ben_ban, ben_ban_vc, lam_chung. Nhãn cho khớp thực thể"
     },
     "timeline": {
       "type": "object",
@@ -46,6 +46,10 @@
     "property": {
       "type": "object",
       "description": "Thửa đất và nhà dùng chung: số thửa, tờ bản đồ, polygon (mét), cạnh, diện tích, tứ cận, giá sang"
+    },
+    "compensation": {
+      "type": "object",
+      "description": "Nhãn cho đánh giá cuối của hồ sơ giải tỏa đền bù, tính từ dữ liệu đúng (không bị ca lỗi sửa): nguoi_dung_ten, nguoi_dai_dien, nguoi_thua_ke, ngay_bat_dau_su_dung_dat, nguon_goc_dat, so_thua, to_ban_do, dien_tich_dat, dien_tich_xay_dung, dien_tich_san, so_tang, ket_cau, nhan_khau"
     },
     "documents": {
       "type": "array",
@@ -246,7 +250,8 @@
             "approve",
             "reject",
             "request_supplement"
-          ]
+          ],
+          "description": "Ý nghĩa theo từng thủ tục, ghi ở đầu procedure.yaml. Giải tỏa đền bù: approve = đủ căn cứ lập phương án bồi thường"
         },
         "reasons": {
           "type": "array",

@@ -18,14 +18,14 @@ flowchart LR
 
 **Diễn giải:**
 
-1. Mỗi hồ sơ có một **persona** (người nộp) dùng chung cho mọi giấy tờ: họ tên, CCCD, ngày sinh, địa chỉ, thẻ đang dùng (CMND 9 số, CCCD mã vạch, CCCD gắn chip, thẻ căn cước, theo ngày cấp). Thủ tục khai báo `people: inheritance` thì dựng thêm nhóm người có quan hệ (người mất, vợ/chồng, các con, hộ khẩu, bên bán đất, người làm chứng), dòng thời gian và thửa đất dùng chung. Trường của từng giấy tờ lấy từ đây hoặc từ generator có ràng buộc.
+1. Mỗi hồ sơ có một **persona** (người nộp) dùng chung cho mọi giấy tờ: họ tên, CCCD, ngày sinh, địa chỉ, thẻ đang dùng (CMND 9 số, CCCD mã vạch, CCCD gắn chip, thẻ căn cước, theo ngày cấp). Thủ tục khai báo `people: deceased_owner` thì dựng thêm nhóm người có quan hệ (người đứng tên đã mất, vợ/chồng, các con, hộ khẩu có con dâu/rể/cháu, bên bán đất, người làm chứng), dòng thời gian và thửa đất dùng chung. Trường của từng giấy tờ lấy từ đây hoặc từ generator có ràng buộc.
 2. Theo tỷ lệ cấu hình trong `procedure.yaml`, hồ sơ bị gây lỗi có chủ đích: thiếu giấy tờ, sai ngày, không đủ điều kiện, mâu thuẫn giữa các giấy tờ. Nhãn quyết định và lý do ghi ngay lúc này.
 3. Template Jinja2 được render bằng Playwright (Chromium) ra PDF và PNG. Mỗi trường trong template gắn `data-field`, nên lấy được bounding box, mỗi dòng chữ một box. Hình thức bản gốc (khổ thẻ/A4/sổ, giấy ố, mực phai, nếp gấp, giấy kẻ dòng, font đánh máy/viết tay) khai báo ở mục `render` của schema.
 4. Ảnh sạch được thêm nhiễu theo từng mức. Biến đổi hình học (xoay, phối cảnh) do code tự làm để biến đổi bbox theo cùng ma trận. Nhiễu quang học (mờ, hạt, JPEG, bóng) dùng Augraphy, chỉ các phép không đổi kích thước ảnh.
 
 ## 2. Thủ tục có sẵn
 
-`thua-ke-nha-dat`: bộ giấy tờ ở [AIP-027 mục 4.2](../../docs/problems/ai-problems/AIP-027-end-to-end-evaluation.md).
+`giai-toa-den-bu`: hồ sơ bồi thường, hỗ trợ khi Nhà nước thu hồi đất, bộ giấy tờ ở [AIP-027 mục 4.2](../../docs/problems/ai-problems/AIP-027-end-to-end-evaluation.md). Tình huống: người đứng tên nhà đất đã mất, một người thừa kế đại diện gia đình nộp hồ sơ. Ngoài nhãn từng giấy tờ, `ground_truth.json` có mục `compensation` (người thừa kế, nguồn gốc và thời điểm sử dụng đất, diện tích, số nhân khẩu) làm nhãn cho đánh giá cuối.
 
 | Giấy tờ (`doc_type`) | Biến thể | Hình thức |
 |---|---|---|
@@ -37,7 +37,7 @@ flowchart LR
 | `so-ho-khau` | `da-xoa-ten` (người mất trước 2023), `chua-xoa-ten` | Khổ sổ, mỗi nhân khẩu một trang, trang điều chỉnh viết tay |
 | `giay-sang-dat` | Không có mẫu | Viết tay trên giấy kẻ dòng; bố cục và lời văn tự do (`generator/freeform.py`), trường có cấu trúc do generator quy tắc sinh |
 
-**Mỗi hồ sơ là một tập dữ liệu:** cùng một nhóm người (người nộp, người mất, gia đình, bên bán đất), luôn đủ 7 giấy tờ, thông tin khớp nhau giữa các giấy tờ trừ chỗ cài lỗi có chủ đích. Mỗi tập nhận một **kịch bản biến thể** (mục `coverage` của `procedure.yaml`): thế hệ thẻ × thời kỳ người mất × giấy chứng nhận đánh máy/viết tay × tờ đăng ký đánh máy/viết tay. Kịch bản xoay vòng nên mọi biến thể xuất hiện đều nhau với bất kỳ số lượng nào, và cứ 36 tập thì phủ hết mọi tổ hợp. Dùng `--coverage random` để lấy phân bố tự nhiên.
+**Mỗi hồ sơ là một tập dữ liệu:** cùng một nhóm người (người nộp, người mất, gia đình, bên bán đất), luôn đủ 7 giấy tờ, thông tin khớp nhau giữa các giấy tờ trừ chỗ cài lỗi có chủ đích. Mỗi tập nhận một **kịch bản biến thể** (mục `coverage` của `procedure.yaml`): nguồn gốc đất (trước 18/12/1980, 1980-15/10/1993, từ 15/10/1993) × thế hệ thẻ × thời kỳ người mất × giấy chứng nhận đánh máy/viết tay × tờ đăng ký đánh máy/viết tay. Kịch bản xoay vòng nên mọi biến thể xuất hiện đều nhau với bất kỳ số lượng nào, và cứ 108 tập thì phủ hết mọi tổ hợp. Tổ hợp không thể có ngoài thực tế (ví dụ người nộp 15-17 tuổi với CCCD mã vạch) được giữ đúng thực tế và ghi ở cột `unmet`. Dùng `--coverage random` để lấy phân bố tự nhiên.
 
 Địa chỉ trên giấy tờ lập trước 01/7/2025 ghi 3 cấp, từ mốc này ghi 2 cấp, cùng một nơi (AIP-008). Dấu, quốc huy, ảnh chân dung là hình giả lập, ghi rõ "MẪU GIẢ LẬP", không mô phỏng dấu hay chi tiết bảo an thật.
 
@@ -62,7 +62,7 @@ src/data-golden-set-generator/
 ├── generated/                   # KHÔNG commit. Kết quả sinh
 │   └── <seed>/
 │       ├── manifest-<procedure>.json  # Tham số chạy, version generator, số tập theo nhãn và theo biến thể
-│       ├── index-<procedure>.csv      # Mỗi tập một dòng: nhãn, ca lỗi, kịch bản, biến thể từng giấy tờ, số trang
+│       ├── index-<procedure>.csv      # Mỗi tập một dòng: nhãn, ca lỗi, nguồn gốc đất, diện tích, nhân khẩu, kịch bản, biến thể từng giấy tờ
 │       └── <dossier-id>/
 │           ├── <doc-id>.pdf
 │           ├── <doc-id>_p1.png
@@ -79,7 +79,7 @@ python -m venv .venv && . .venv/bin/activate
 pip install -e ".[render,noise]"
 playwright install chromium
 python -m generator list
-python -m generator generate --procedure thua-ke-nha-dat --seed 42 --count 20 --noise light,medium,heavy
+python -m generator generate --procedure giai-toa-den-bu --seed 42 --count 20 --noise light,medium,heavy
 python -m pytest
 ```
 
@@ -100,6 +100,6 @@ Ví dụ đầy đủ một thủ tục 2 giấy tờ (schema, template, procedu
 3. Khai báo giấy tờ trong `procedure.yaml` của thủ tục.
 4. Sinh thử 5 hồ sơ, mở PDF so với mẫu gốc, kiểm tra bbox bằng `python -m generator inspect <dossier-dir>`.
 
-Giấy tờ nhiều mẫu theo thời kỳ, thẻ, giấy cũ, nhóm trường lặp, bố cục tự do: xem các khóa mở rộng cuối `specs/schema.example.yaml` và ví dụ ở `templates/thua-ke-nha-dat/`.
+Giấy tờ nhiều mẫu theo thời kỳ, thẻ, giấy cũ, nhóm trường lặp, bố cục tự do: xem các khóa mở rộng cuối `specs/schema.example.yaml` và ví dụ ở `templates/giai-toa-den-bu/`.
 
 Tốc độ: khoảng 1 phút mỗi hồ sơ 7 giấy tờ (khoảng 16 trang) với cả 3 mức nhiễu; phần lớn là Augraphy. Dùng `--noise ""` khi chỉ cần ảnh sạch.

@@ -30,6 +30,9 @@ PHRASES = {
     "addr": ["Địa chỉ: {dia_chi}", "Hiện ngụ tại: {dia_chi}", "Thường trú tại: {dia_chi}"],
     "narrative_seller": ["Tôi tên là {ben_ban_ho_ten}, sinh năm {ben_ban_nam_sinh}, hiện ngụ tại {ben_ban_dia_chi}.",
                          "Tôi là {ben_ban_ho_ten}, sinh năm {ben_ban_nam_sinh}, cư ngụ tại {ben_ban_dia_chi}."],
+    "seller_spouse": ["Cùng {ben_ban_vc_quan_he} tôi là {ben_ban_vc_ho_ten} đồng ý.",
+                      "Người cùng đứng tên bán là {ben_ban_vc_quan_he} tôi, {ben_ban_vc_ho_ten}."],
+    "seller_spouse_list": ["và {ben_ban_vc_quan_he}: {ben_ban_vc_ho_ten}"],
     "narrative_buyer": ["Nay tôi đồng ý sang lại cho {ben_mua_goi} {ben_mua_ho_ten}, sinh năm {ben_mua_nam_sinh}, ngụ tại {ben_mua_dia_chi},",
                         "Nay tôi làm giấy này bán cho {ben_mua_goi} {ben_mua_ho_ten}, sinh năm {ben_mua_nam_sinh}, ở tại {ben_mua_dia_chi},"],
     "land": ["một miếng đất thổ cư diện tích {dien_tich} (ngang {rong}, dài {dai}), tọa lạc tại {dia_chi_dat}.",
@@ -82,6 +85,8 @@ def _party(rng: random.Random, fields: dict, role: str) -> list[dict]:
     head = rng.choice(PHRASES[f"{'seller' if role == 'ben_ban' else 'buyer'}_list"])
     parts = list(head)
     parts.append(rng.choice(PHRASES["id"]).replace("{cmnd}", f"{{{role}_cmnd}}"))
+    if role == "ben_ban":
+        parts.append(PHRASES["seller_spouse_list"][0])
     lines = [{"kind": "para", "align": "left", "segments": _join(parts, fields)}]
     addr = parse(rng.choice(PHRASES["addr"]).replace("{dia_chi}", f"{{{role}_dia_chi}}"), fields)
     if addr:
@@ -109,6 +114,7 @@ def giay_sang_dat(rng: random.Random, fields: dict) -> list[dict]:
         blocks.append(block("para", rng.choice(PHRASES["land"][2:])))
     else:
         blocks.append(block("para", rng.choice(PHRASES["narrative_seller"])))
+        blocks.append(block("para", rng.choice(PHRASES["seller_spouse"])))
         blocks.append(block("para", rng.choice(PHRASES["narrative_buyer"]) + " " + rng.choice(PHRASES["land"][:2])))
     blocks.append(block("para", rng.choice(PHRASES["bounds"])))
     blocks.append(block("para", rng.choice(PHRASES["price"])))
@@ -118,6 +124,8 @@ def giay_sang_dat(rng: random.Random, fields: dict) -> list[dict]:
         blocks.append(block("para", rng.choice(PHRASES["place_date"]), "right"))
 
     signers = [(rng.choice(PHRASES["sign_seller"]), "ben_ban_ho_ten"), (rng.choice(PHRASES["sign_buyer"]), "ben_mua_ho_ten")]
+    if fields.get("ben_ban_vc_ho_ten", {}).get("text"):
+        signers.insert(1, (fields["ben_ban_vc_quan_he"]["text"].capitalize() + " bên bán", "ben_ban_vc_ho_ten"))
     if fields.get("lam_chung_ho_ten", {}).get("text"):
         signers.append((rng.choice(PHRASES["sign_witness"]), "lam_chung_ho_ten"))
     if rng.random() < 0.5:

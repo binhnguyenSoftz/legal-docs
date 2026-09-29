@@ -26,6 +26,8 @@ fields:
     type: address
     gen: address_at
     params: {source: people.ben_ban.noi_thuong_tru_parts}
+  - {name: ben_ban_vc_quan_he, label: Quan hệ vợ/chồng bên bán, type: text, source: people.ben_ban_vc.quan_he, transform: lower}
+  - {name: ben_ban_vc_ho_ten, label: Vợ/chồng bên bán, type: person_name, source: people.ben_ban_vc.ho_ten, blank_rate: 0.5}
   - {name: ben_mua_goi, label: Xưng hô bên mua, type: text, source: people.nguoi_mat.xung_ho}
   - {name: ben_mua_ho_ten, label: Họ tên bên mua, type: person_name, source: people.nguoi_mat.ho_ten}
   - {name: ben_mua_nam_sinh, label: Năm sinh bên mua, type: year, source: people.nguoi_mat.ngay_sinh.year}

@@ -52,6 +52,25 @@ def _gen_address_at(rng, params, ctx):
     return address.place(parts, at) if params.get("kind") == "place" else address.format_at(parts, at)
 
 
+OCCUPATIONS = {
+    "child": ["Học sinh"],
+    "young": ["Sinh viên", "Công nhân", "Lao động tự do", "Buôn bán", "Bộ đội"],
+    "adult": ["Buôn bán", "Công nhân", "Cán bộ", "Nội trợ", "Lao động tự do", "Làm ruộng", "Giáo viên", "Bộ đội",
+              "Thợ may", "Thợ mộc", "Tài xế", "Kế toán", "Y tá", "Công nhân viên chức"],
+    "old": ["Hưu trí", "Nội trợ", "Làm ruộng", "Buôn bán"],
+}
+
+
+def _gen_occupation(rng, params, ctx):
+    """Nghề nghiệp hợp với tuổi của người đó tại ngày lập giấy tờ. Chưa đi học hoặc chưa sinh: None."""
+    person = resolve_path(params.get("person", "item"), ctx)
+    age = dates.age_on(person["ngay_sinh"], _date_param(params.get("at", "doc.issue_date"), ctx))
+    if age < 6:
+        return None
+    group = "child" if age < 18 else "young" if age < 23 else "adult" if age < 60 else "old"
+    return rng.choice(OCCUPATIONS[group])
+
+
 def _gen_pattern(rng, params, ctx):
     """'#' -> một chữ số. Ví dụ '###/2001/QSDĐ'."""
     return "".join(str(rng.randrange(10)) if c == "#" else c for c in params["pattern"])
@@ -69,6 +88,7 @@ GENERATORS = {
     "date_offset": _gen_date_offset,
     "address_at": _gen_address_at,
     "pattern": _gen_pattern,
+    "occupation": _gen_occupation,
     "template": _gen_template,
     "phone": lambda rng, params, ctx: phone.generate(rng),
     "person_name": lambda rng, params, ctx: names.generate(rng, params.get("gender") or rng.choice(["male", "female"]))["ho_ten"],

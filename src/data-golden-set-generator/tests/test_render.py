@@ -24,7 +24,7 @@ def renderer():
 @pytest.mark.parametrize("index", [0, 1])
 def test_every_printed_field_has_bbox(renderer, tmp_path, index):
     from generator.render import pick_style
-    proc = spec.load_procedure("thua-ke-nha-dat")
+    proc = spec.load_procedure("giai-toa-den-bu")
     d = dossier.build(proc, 3, index)
     style = pick_style(random.Random(derive_seed(d["seed"], "style")))
     for doc in d["documents"]:

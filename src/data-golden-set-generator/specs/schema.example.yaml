@@ -88,7 +88,7 @@ decorations:
     overlap_text_rate: 0.3         # Tỷ lệ đè lên chữ
 
 # ---------------------------------------------------------------------------
-# Khóa mở rộng (ví dụ đầy đủ: templates/thua-ke-nha-dat/*/schema.yaml)
+# Khóa mở rộng (ví dụ đầy đủ: templates/giai-toa-den-bu/*/schema.yaml)
 # ---------------------------------------------------------------------------
 #
 # issue_date:

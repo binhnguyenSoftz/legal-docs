@@ -30,9 +30,12 @@ def _perturb(rng: random.Random, kind: str, value):
             return value + timedelta(days=delta)
         case "swap_digits":
             s = list(value)
-            i = rng.randrange(len(s) - 1)
-            while s[i] == s[i + 1]:
-                i = rng.randrange(len(s) - 1)
+            pairs = [i for i in range(len(s) - 1) if s[i] != s[i + 1]]
+            if not pairs:  # "7", "11": không đảo được thì đổi một chữ số
+                i = rng.randrange(len(s))
+                s[i] = rng.choice([c for c in "0123456789" if c != s[i]])
+                return "".join(s)
+            i = rng.choice(pairs)
             s[i], s[i + 1] = s[i + 1], s[i]
             return "".join(s)
         case "typo_name":
@@ -46,7 +49,7 @@ def _perturb(rng: random.Random, kind: str, value):
             # Diện tích lệch 1-8%: đo đạc lại khác giấy chứng nhận, hoặc ghi sai.
             return round(value * (1 + rng.choice([1, -1]) * rng.uniform(0.01, 0.08)), 1)
         case "year_shift":
-            return value.replace(year=value.year + rng.choice([1, -1]) * rng.randint(1, 3))
+            return dates.add_years(value, rng.choice([1, -1]) * rng.randint(1, 3))
         case "other_address":
             new = value
             while new == value:

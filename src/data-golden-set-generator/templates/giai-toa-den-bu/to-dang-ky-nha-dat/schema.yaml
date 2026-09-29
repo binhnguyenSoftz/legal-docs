@@ -30,8 +30,8 @@ fields:
   - name: nghe_nghiep
     label: Nghề nghiệp
     type: text
-    gen: choice
-    params: {values: [Buôn bán, Công nhân, Cán bộ, Nội trợ, Lao động tự do, Hưu trí]}
+    gen: occupation
+    params: {person: people.nguoi_mat}
     fill: typed
     by_variant: {viet-tay: {fill: handwritten}}
   - name: dia_chi_thuong_tru

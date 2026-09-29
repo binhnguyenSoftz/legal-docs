@@ -5,7 +5,38 @@ from datetime import date, timedelta
 
 from generator.fields import address, cccd, dates, names, phone
 
-RELIGIONS = ["Không", "Không", "Không", "Không", "Phật giáo", "Công giáo"]
+RELIGIONS = ["Không", "Phật giáo", "Công giáo", "Tin Lành", "Cao Đài", "Phật giáo Hòa Hảo"]
+RELIGION_WEIGHTS = {"north": [80, 12, 7, 1, 0, 0], "central": [72, 15, 11, 2, 0, 0], "south": [60, 20, 10, 2, 5, 3]}
+
+# Dân tộc theo mã thống kê tỉnh cũ (nơi thường trú), kèm họ đặc trưng. [CẦN XÁC NHẬN] tỷ lệ chỉ để đa dạng hóa dữ liệu.
+ETHNIC_BY_AREA = [
+    ({"02", "04", "06", "08", "10", "11", "12", "14", "15", "17", "20"},
+     {"Kinh": 45, "Tày": 18, "Thái": 12, "Nùng": 8, "H'Mông": 8, "Mường": 5, "Dao": 4}),
+    ({"62", "64", "66", "67", "68"}, {"Kinh": 70, "Ê Đê": 10, "Gia Rai": 10, "Ba Na": 5, "Cơ Ho": 5}),
+    ({"84", "89", "91", "94", "95"}, {"Kinh": 80, "Khmer": 17, "Hoa": 3}),
+    ({"79"}, {"Kinh": 92, "Hoa": 8}),
+]
+ETHNIC_DEFAULT = {"Kinh": 98, "Mường": 1, "Hoa": 1}
+ETHNIC_SURNAMES = {
+    "Tày": ["Nông", "Hoàng", "Lương", "Hà", "Triệu"], "Thái": ["Lò", "Lường", "Quàng", "Cầm", "Vi"],
+    "Nùng": ["Nông", "Hoàng", "Lục", "Vi"], "H'Mông": ["Giàng", "Thào", "Sùng", "Vàng", "Lầu", "Mùa"],
+    "Mường": ["Bùi", "Đinh", "Quách", "Xa"], "Dao": ["Triệu", "Bàn", "Đặng", "Lý"],
+    "Ê Đê": ["Niê", "Mlô", "Êban"], "Gia Rai": ["Ksor", "Siu", "Rơ Chăm", "Rah Lan"], "Ba Na": ["Đinh", "A"],
+    "Cơ Ho": ["Liêng", "Kră", "Ka"], "Khmer": ["Thạch", "Sơn", "Danh", "Kim", "Lâm", "Châu"],
+    "Hoa": ["Lâm", "Lý", "Trương", "Quách", "Diệp", "Tăng", "Lưu"],
+}
+
+
+def pick_ethnicity(rng: random.Random, province: str) -> str:
+    code = address._province_code().get(province, "01")
+    table = next((t for codes, t in ETHNIC_BY_AREA if code in codes), ETHNIC_DEFAULT)
+    return rng.choices(list(table), weights=list(table.values()), k=1)[0]
+
+
+def pick_religion(rng: random.Random, province: str, dan_toc: str) -> str:
+    if dan_toc == "Khmer":
+        return "Phật giáo"
+    return rng.choices(RELIGIONS, weights=RELIGION_WEIGHTS[address.region(province)], k=1)[0]
 
 
 def _ca(province: str) -> str:
@@ -50,11 +81,16 @@ def _cards(rng: random.Random, dob: date, gender: str, as_of: date, number: str,
 
 
 def make(rng: random.Random, dob: date, gender: str, as_of: date, ho: str | None = None,
-         card: str | None = None, thuong_tru: dict | None = None) -> dict:
-    """as_of: ngày giấy tờ tùy thân phải còn hạn (ngày nộp, hoặc ngày mất với người đã mất)."""
+         card: str | None = None, thuong_tru: dict | None = None, dan_toc: str | None = None,
+         ton_giao: str | None = None) -> dict:
+    """as_of: ngày giấy tờ tùy thân phải còn hạn (ngày nộp, hoặc ngày mất với người đã mất).
+    dan_toc, ton_giao: truyền vào để cả gia đình giống nhau; không truyền thì chọn theo vùng nơi thường trú."""
     que_quan = address.generate(rng)
     thuong_tru = thuong_tru or address.generate(rng)
-    name = names.generate(rng, gender, ho)
+    dan_toc = dan_toc or pick_ethnicity(rng, thuong_tru["tinh_cu"])
+    if not ho and dan_toc in ETHNIC_SURNAMES and rng.random() < 0.8:
+        ho = rng.choice(ETHNIC_SURNAMES[dan_toc])
+    name = names.generate(rng, gender, ho, dob.year)
     number = cccd.generate(rng, dob, gender, cccd.code_for(que_quan["tinh_cu"]))
     person = {
         **name,
@@ -69,8 +105,8 @@ def make(rng: random.Random, dob: date, gender: str, as_of: date, ho: str | None
         "noi_thuong_tru_parts": thuong_tru,
         "que_quan_parts": que_quan,
         "dien_thoai": phone.generate(rng),
-        "dan_toc": "Kinh",
-        "ton_giao": rng.choice(RELIGIONS),
+        "dan_toc": dan_toc,
+        "ton_giao": ton_giao or pick_religion(rng, thuong_tru["tinh_cu"], dan_toc),
         "quoc_tich": "Việt Nam",
     }
     person.update(_cards(rng, dob, gender, as_of, number, thuong_tru, card))

@@ -1,0 +1,148 @@
+# Hồ sơ giải tỏa đền bù (bồi thường, hỗ trợ khi Nhà nước thu hồi đất): bộ giấy tờ ở AIP-027 mục 4.2.
+# Tình huống: người đứng tên nhà đất đã mất; một người thừa kế đại diện gia đình nộp hồ sơ nhận bồi thường.
+# - Giấy chứng nhận, tờ đăng ký, giấy sang đất: chứng minh quyền sử dụng, nguồn gốc và thời điểm sử dụng đất.
+# - Bản vẽ hiện trạng: diện tích đo thực tế, đối chiếu với giấy chứng nhận.
+# - Giấy chứng tử: người đứng tên đã mất, người thừa kế nhận thay.
+# - Sổ hộ khẩu: nhân khẩu của hộ, căn cứ xét hỗ trợ và tái định cư.
+# [CẦN XÁC NHẬN] Thành phần hồ sơ bắt buộc và quy tắc xét: đối chiếu quy định bồi thường của địa phương.
+
+procedure: giai-toa-den-bu
+title: Bồi thường, hỗ trợ khi Nhà nước thu hồi đất (giải tỏa đền bù)
+legal_basis:
+  - "[CẦN XÁC NHẬN] Luật Đất đai 2024, Chương VII (bồi thường, hỗ trợ, tái định cư khi Nhà nước thu hồi đất)"
+  - "[CẦN XÁC NHẬN] Nghị định 88/2024/NĐ-CP về bồi thường, hỗ trợ, tái định cư"
+
+# Nhãn quyết định (decision.label) của thủ tục này:
+#   approve             hồ sơ hợp lệ, đủ căn cứ lập phương án bồi thường
+#   request_supplement  phải bổ sung, làm rõ (thông tin mâu thuẫn, giấy tờ hết giá trị)
+#   reject              không đủ điều kiện (chưa dùng ở bộ ca lỗi hiện tại)
+
+# people: deceased_owner -> dựng người đứng tên đã mất, vợ/chồng, các con (người nộp là một người con),
+# hộ khẩu, bên bán đất, người làm chứng (generator/people.py) và thửa đất dùng chung (generator/property.py).
+people: deceased_owner
+persona:
+  age: [25, 70]
+  gender: any
+
+submit_date: ["2025-07-01", "2026-06-30"]
+
+documents:
+  - doc_type: can-cuoc                  # Của người nộp. Thế hệ thẻ theo ngày cấp
+    required: true
+  - doc_type: giay-chung-tu             # Mẫu theo thời kỳ: giấy chứng tử (trước 2016) / trích lục khai tử
+    required: true
+  - doc_type: giay-chung-nhan-nha-dat   # Mẫu cũ, 4 trang
+    required: true
+  - doc_type: ban-ve-hien-trang
+    required: true
+  - doc_type: to-dang-ky-nha-dat        # Giấy tờ cũ, đánh máy hoặc viết tay
+    required: true
+  - doc_type: so-ho-khau
+    required: true
+  - doc_type: giay-sang-dat             # Viết tay, không có mẫu
+    required: true
+
+# Mỗi hồ sơ là một tập dữ liệu: cùng một nhóm người, luôn đủ 7 giấy tờ.
+# Mỗi hồ sơ nhận một kịch bản biến thể (dossier.plan), xoay vòng để các biến thể xuất hiện đều nhau;
+# cứ 108 hồ sơ (3 x 3 x 3 x 2 x 2) thì phủ hết mọi tổ hợp. Kịch bản và biến thể đạt được ghi ở ground_truth.json > profile.
+# knob: cách generator điều hướng để ra đúng biến thể
+#   persona.card      ép thế hệ thẻ của người nộp (ngày cấp trong khoảng của thế hệ đó)
+#   people.nam_mat    ép thời kỳ người đứng tên mất (quyết định mẫu giấy chứng tử và dòng xóa tên trong sổ hộ khẩu)
+#   people.nguon_goc  ép thời điểm bắt đầu sử dụng đất (ngày lập giấy sang đất) theo các mốc xét bồi thường
+#   variant           chọn thẳng biến thể ngẫu nhiên của giấy tờ (đánh máy / viết tay)
+coverage:
+  - name: nguon_goc
+    knob: people.nguon_goc
+    values:
+      truoc-18-12-1980: {}
+      1980-15-10-1993: {}
+      tu-15-10-1993: {}
+  - name: the
+    knob: persona.card
+    values:
+      cccd-ma-vach: {can-cuoc: cccd-ma-vach}
+      cccd-chip: {can-cuoc: cccd-chip}
+      the-can-cuoc: {can-cuoc: the-can-cuoc}
+  - name: nam_mat
+    knob: people.nam_mat
+    values:
+      truoc-2016: {giay-chung-tu: giay-chung-tu, so-ho-khau: da-xoa-ten}
+      2016-2022: {giay-chung-tu: trich-luc-khai-tu, so-ho-khau: da-xoa-ten}
+      tu-2023: {giay-chung-tu: trich-luc-khai-tu, so-ho-khau: chua-xoa-ten}
+  - name: gcn
+    knob: variant
+    values:
+      danh-may: {giay-chung-nhan-nha-dat: danh-may}
+      viet-tay: {giay-chung-nhan-nha-dat: viet-tay}
+  - name: to_dang_ky
+    knob: variant
+    values:
+      danh-may: {to-dang-ky-nha-dat: danh-may}
+      viet-tay: {to-dang-ky-nha-dat: viet-tay}
+
+rules:
+  - id: R02
+    text: Thông tin người đứng tên nhà đất (đã mất) phải khớp giữa các giấy tờ
+  - id: R03
+    text: Thông tin thửa đất (số thửa, địa chỉ, diện tích) trên giấy chứng nhận và bản vẽ hiện trạng phải khớp nhau
+  - id: R04
+    text: Giấy tờ tùy thân của người đại diện nhận bồi thường phải còn giá trị
+  - id: R05
+    text: Người đứng tên nhà đất phải mất trước ngày nộp hồ sơ
+  - id: R06
+    text: Người đại diện nhận bồi thường phải từ đủ 18 tuổi, nếu không phải có người giám hộ
+
+mix:
+  valid: 0.5
+  invalid: 0.5
+
+# Không có ca thiếu giấy tờ (missing_document): mỗi tập dữ liệu luôn đủ 7 giấy tờ.
+# Ca lỗi chỉ sửa giá trị trên giấy tờ, hoặc dựng người nộp ngoài điều kiện.
+mutations:
+  - id: M02
+    kind: field_conflict          # Họ tên người đứng tên trên giấy chứng tử khác các giấy tờ khác (khớp thực thể)
+    weight: 2
+    params: {doc_type: giay-chung-tu, field: ho_ten, perturb: typo_name}
+    expect: {decision: request_supplement, rule: R02}
+
+  - id: M03
+    kind: field_conflict          # Năm sinh chủ hộ (người mất) trong sổ hộ khẩu lệch
+    weight: 1
+    params: {doc_type: so-ho-khau, field: tv1_ngay_sinh, perturb: year_shift}
+    expect: {decision: request_supplement, rule: R02}
+
+  - id: M04
+    kind: field_conflict          # Diện tích đo thực tế trên bản vẽ lệch giấy chứng nhận
+    weight: 2
+    params: {doc_type: ban-ve-hien-trang, field: dien_tich, perturb: area_shift}
+    expect: {decision: request_supplement, rule: R03}
+
+  - id: M05
+    kind: persona_override        # Người nộp còn dùng CMND 9 số, đã hết giá trị từ 01/01/2025
+    weight: 1
+    params: {card: cmnd-9, age: [35, 70]}
+    expect: {decision: request_supplement, rule: R04}
+
+  - id: M06
+    kind: date_order              # Ngày mất ghi sau ngày nộp
+    weight: 1
+    params: {doc_type: giay-chung-tu, field: ngay_mat, after: dossier.submit_date}
+    expect: {decision: request_supplement, rule: R05}
+
+  - id: M07
+    kind: persona_override        # Người đại diện chưa đủ 18 tuổi, không có người giám hộ
+    weight: 1
+    params: {age: [15, 17]}
+    expect: {decision: request_supplement, rule: R06}
+
+  - id: M08
+    kind: field_conflict          # Số thửa trên bản vẽ khác giấy chứng nhận
+    weight: 1
+    params: {doc_type: ban-ve-hien-trang, field: so_thua, perturb: swap_digits}
+    expect: {decision: request_supplement, rule: R03}
+
+  - id: M09
+    kind: field_conflict          # Địa chỉ thửa đất trên bản vẽ là nơi khác
+    weight: 1
+    params: {doc_type: ban-ve-hien-trang, field: dia_chi, perturb: other_address}
+    expect: {decision: request_supplement, rule: R03}
