@@ -35,6 +35,15 @@ mix:
 
 # Ca lỗi có chủ đích. Mỗi ca ghi rõ quyết định kỳ vọng và quy tắc vi phạm.
 # kind: missing_document | field_conflict | field_value | date_order | persona_override
+#       | calc_error (thành tiền một dòng bảng tính sai) | thu_hoi_override (dựng đợt thu hồi ngoài điều kiện)
+# Khóa mở rộng (ví dụ: templates/giai-toa-den-bu-tphcm/procedure.yaml):
+#   documents: - {doc_type: can-cuoc, from: giai-toa-den-bu}       dùng lại schema, template của thủ tục khác
+#              - {doc_type: khen-thuong, when: thu_hoi.co_khen_thuong}   chỉ có khi điều kiện đúng
+#   province: Thành phố Hồ Chí Minh                                  nhà đất, người nộp chỉ thuộc tỉnh này
+#   thu_hoi: tphcm-2026                                              dựng đợt thu hồi, tính bồi thường
+#   mutation needs: {thu_hoi.ban_giao: [dung-han]}                   chỉ chọn ca lỗi khi kịch bản cho phép
+#   field_value mirror: [so_tien_bang_chu]                           trường đổi theo cùng giá trị
+#   date_order before: thu_hoi.ngay_gxn                              kéo ngày về trước mốc (after: đẩy ra sau)
 mutations:
   - id: M01
     kind: missing_document

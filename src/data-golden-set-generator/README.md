@@ -39,6 +39,18 @@ flowchart LR
 
 **Mỗi hồ sơ là một tập dữ liệu:** cùng một nhóm người (người nộp, người mất, gia đình, bên bán đất), luôn đủ 7 giấy tờ, thông tin khớp nhau giữa các giấy tờ trừ chỗ cài lỗi có chủ đích. Mỗi tập nhận một **kịch bản biến thể** (mục `coverage` của `procedure.yaml`): nguồn gốc đất (trước 18/12/1980, 1980-15/10/1993, từ 15/10/1993) × thế hệ thẻ × thời kỳ người mất × giấy chứng nhận đánh máy/viết tay × tờ đăng ký đánh máy/viết tay. Kịch bản xoay vòng nên mọi biến thể xuất hiện đều nhau với bất kỳ số lượng nào, và cứ 108 tập thì phủ hết mọi tổ hợp. Tổ hợp không thể có ngoài thực tế (ví dụ người nộp 15-17 tuổi với CCCD mã vạch) được giữ đúng thực tế và ghi ở cột `unmet`. Dùng `--coverage random` để lấy phân bố tự nhiên.
 
+`giai-toa-den-bu-tphcm`: cùng tình huống, nhà đất ở TP.HCM, thêm 5 giấy tờ của quá trình bồi thường theo Quyết định 11/2026/QĐ-UBND TP.HCM. 7 giấy tờ đầu vào dùng lại của `giai-toa-den-bu` (khóa `from`). Số tiền tính bằng `generator/thu_hoi.py`; công thức, giả định và câu hỏi còn mở ở [specs/de-xuat-giay-to-boi-thuong.md](specs/de-xuat-giay-to-boi-thuong.md).
+
+| Giấy tờ (`doc_type`) | Biến thể | Hình thức |
+|---|---|---|
+| `gxn-1131` | `danh-may`, `dien-tay` | A4, UBND cấp xã xác nhận nguồn gốc, thời điểm sử dụng đất `[CẦN XÁC NHẬN]` mẫu thật |
+| `bt-dat` | | A4 ngang, bảng chiết tính, tổng bằng số và bằng chữ |
+| `bt-cong-trinh` | | A4 ngang, bảng 10 cột: khối lượng, đơn giá, tỷ lệ còn lại, bổ sung đủ 60% |
+| `tai-dinh-cu` | `can-ho`, `nen-dat`, `tu-lo-cho-o` | Quyết định; chỉ có khi hộ đủ điều kiện tái định cư |
+| `khen-thuong` | | Quyết định; chỉ có khi bàn giao mặt bằng đúng hạn |
+
+Thêm 3 trục kịch bản: phạm vi thu hồi (toàn bộ / một phần) × bàn giao (đúng hạn / trễ) × tái định cư (căn hộ / nền đất / tự lo / không đủ điều kiện), cứ 16 tập đầu phủ hết. Ca lỗi M10-M19 kiểm tra số học (tổng cộng, bằng chữ, sàn 60%), mức thưởng, nhân khẩu, thứ tự ngày.
+
 Địa chỉ trên giấy tờ lập trước 01/7/2025 ghi 3 cấp, từ mốc này ghi 2 cấp, cùng một nơi (AIP-008). Dấu, quốc huy, ảnh chân dung là hình giả lập, ghi rõ "MẪU GIẢ LẬP", không mô phỏng dấu hay chi tiết bảo an thật.
 
 ## 3. Cấu trúc thư mục

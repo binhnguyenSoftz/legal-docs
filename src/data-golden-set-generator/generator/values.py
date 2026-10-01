@@ -22,9 +22,9 @@ def resolve_path(path: str, ctx: dict):
 
 
 def dossier_ctx(dossier: dict) -> dict:
-    """Ngữ cảnh để schema và mutation tham chiếu: persona, people, timeline, property, dossier."""
+    """Ngữ cảnh để schema và mutation tham chiếu: persona, people, timeline, property, thu_hoi, dossier."""
     return {"dossier": dossier, "persona": dossier["persona"], "people": dossier.get("people"),
-            "timeline": dossier.get("timeline"), "property": dossier.get("property")}
+            "timeline": dossier.get("timeline"), "property": dossier.get("property"), "thu_hoi": dossier.get("thu_hoi")}
 
 
 def _date_param(value, ctx) -> date:

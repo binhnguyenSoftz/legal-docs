@@ -20,7 +20,12 @@ class DocSchema:
     render: dict = field(default_factory=dict)
     groups: list[dict] = field(default_factory=list)
     freeform: str | None = None
+    procedure: str = ""            # Thư mục thủ tục chứa schema và template (khác thủ tục đang sinh khi dùng `from`)
     raw: dict = field(default_factory=dict)
+
+    @property
+    def template(self) -> str:
+        return f"{self.procedure}/{self.doc_type}/template.html.j2"
 
     def field_spec(self, name: str) -> dict:
         """Tìm cả trường của nhóm lặp: 'tv2_ho_ten' -> spec 'ho_ten' của nhóm 'tv'."""
@@ -47,6 +52,8 @@ class Procedure:
     schemas: dict[str, DocSchema]
     people: str | None = None
     coverage: list[dict] = field(default_factory=list)
+    province: str | None = None    # Nhà đất và người nộp chỉ thuộc tỉnh/thành phố này
+    thu_hoi: str | None = None     # Bộ quy định tính bồi thường (generator/thu_hoi.py), ví dụ tphcm-2026
 
 
 def list_procedures() -> list[str]:
@@ -66,6 +73,7 @@ def load_schema(procedure: str, doc_type: str) -> DocSchema:
         render=raw.get("render", {}),
         groups=raw.get("groups", []),
         freeform=raw.get("freeform"),
+        procedure=procedure,
         raw=raw,
     )
 
@@ -91,7 +99,10 @@ def load_procedure(name: str) -> Procedure:
         mix=raw.get("mix", {"valid": 1.0, "invalid": 0.0}),
         persona=raw.get("persona", {}),
         submit_date=raw["submit_date"],
-        schemas={d["doc_type"]: load_schema(name, d["doc_type"]) for d in raw["documents"]},
+        # `from`: dùng lại schema và template của thủ tục khác, ví dụ 7 giấy tờ của giai-toa-den-bu.
+        schemas={d["doc_type"]: load_schema(d.get("from", name), d["doc_type"]) for d in raw["documents"]},
         people=raw.get("people"),
         coverage=raw.get("coverage", []),
+        province=raw.get("province"),
+        thu_hoi=raw.get("thu_hoi"),
     )

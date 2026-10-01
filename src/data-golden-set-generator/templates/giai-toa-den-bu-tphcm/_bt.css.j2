@@ -1,0 +1,22 @@
+<style>
+/* Dùng chung cho bảng chiết tính (A4 ngang) và quyết định của thủ tục giai-toa-den-bu-tphcm. */
+.hdr { display: flex; justify-content: space-between; align-items: flex-start; }
+.hdr .quoc-hieu { margin: 0; white-space: nowrap; }
+.hdr-left { width: 70mm; text-align: center; font-size: 11pt; }
+.a4l .title { margin: 4mm 0 1mm; }
+.info { display: grid; grid-template-columns: 1fr 1fr; column-gap: 8mm; row-gap: 0.8mm; margin: 3mm 0; }
+.info .wide { grid-column: 1 / -1; }
+table.calc { font-size: 10pt; margin: 2mm 0; }
+table.calc th { font-size: 9.5pt; }
+table.calc td.num { text-align: right; white-space: nowrap; }
+table.calc tr.total td { font-weight: bold; }
+.signs { display: flex; justify-content: space-between; margin-top: 3mm; }
+.signs .sign-block { width: 70mm; position: relative; }
+.signs .approver { width: 90mm; }
+.lbl { display: inline-block; min-width: 55mm; }
+.sign { width: 85mm; margin-left: auto; text-align: center; position: relative; margin-top: 5mm; }
+.sign .signature { margin: 3mm auto; }
+.dieu { margin: 2mm 0; }
+/* Trường nằm giữa câu văn: chảy theo dòng như chữ thường, không thành khối riêng. */
+.dieu .field.plain, .info .field.plain { display: inline; }
+</style>

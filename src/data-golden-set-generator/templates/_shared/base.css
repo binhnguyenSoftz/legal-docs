@@ -5,6 +5,7 @@ html, body { margin: 0; padding: 0; background: #fff; }
         page-break-after: always; break-after: page; background-color: var(--paper); }
 .page:last-child { page-break-after: auto; break-after: auto; }
 .page.card { width: 85.6mm; height: 53.98mm; padding: 0; font-family: "Arimo", "Liberation Sans", sans-serif; font-size: 6.5pt; line-height: 1.25; }
+.page.a4l { width: 297mm; height: 210mm; padding: 12mm 14mm 12mm 18mm; font-size: 11pt; line-height: 1.35; }
 .page.so { width: 125mm; height: 180mm; padding: 9mm 9mm 9mm 12mm; font-size: 10pt; line-height: 1.45; }
 body { font-family: var(--print-font), "Tinos", "Times New Roman", "Liberation Serif", serif; font-size: 13pt; line-height: 1.5; color: var(--ink); }
 

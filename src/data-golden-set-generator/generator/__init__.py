@@ -5,7 +5,7 @@ Tăng GENERATOR_VERSION mỗi khi đổi logic sinh làm thay đổi kết quả
 
 from pathlib import Path
 
-GENERATOR_VERSION = "0.4.0"
+GENERATOR_VERSION = "0.5.0"
 
 ROOT = Path(__file__).resolve().parent.parent
 TEMPLATES_DIR = ROOT / "templates"

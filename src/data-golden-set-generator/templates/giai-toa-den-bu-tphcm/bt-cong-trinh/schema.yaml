@@ -1,0 +1,68 @@
+doc_type: bt-cong-trinh
+version: 1
+title: Bảng chiết tính bồi thường nhà, công trình, vật kiến trúc
+source_form: "[CẦN XÁC NHẬN] Bảng chi tiết kèm quyết định phê duyệt phương án bồi thường (mỗi địa phương một mẫu)"
+pages: 1
+
+issue_date:
+  source: thu_hoi.ngay_qd
+
+render:
+  page: a4l
+  paper: white
+  age: [0, 0.08]
+
+# Nhãn suy luận (QĐ 11/2026 TP.HCM), từng dòng:
+#   gia_tri_hien_co = khoi_luong × don_gia × ty_le_con_lai
+#   bo_sung         = max(0, 60% × khoi_luong × don_gia - gia_tri_hien_co)
+#   thanh_tien      = gia_tri_hien_co + bo_sung
+# tong_cong = Σ thanh_tien (R10). Khối lượng nhà chính = diện tích sàn (cả căn khi phần đất còn lại không đủ để ở).
+fields:
+  - {name: co_quan, label: UBND cấp xã, type: organization, source: thu_hoi.co_quan, transform: upper, fill: printed}
+  - {name: ten_du_an, label: Dự án, type: text, source: thu_hoi.ten_du_an, fill: printed}
+  - {name: so_qd, label: Kèm theo quyết định số, type: text, source: thu_hoi.so_qd, fill: printed}
+  - {name: ngay_qd, label: Ngày quyết định, type: date, source: thu_hoi.ngay_qd, fill: printed}
+  - {name: chu_su_dung, label: Chủ sở hữu, type: person_name, source: people.nguoi_mat.ho_ten, transform: upper, fill: printed}
+  - {name: nguoi_nhan, label: Người đại diện nhận tiền, type: person_name, source: people.nguoi_nop.ho_ten, fill: printed}
+  - name: dia_chi_thua_dat
+    label: Địa chỉ nhà đất
+    type: address
+    gen: address_at
+    params: {source: property.dia_chi_parts}
+    fill: printed
+  - {name: so_tang, label: Số tầng, type: number, source: property.nha.so_tang, fill: printed}
+  - {name: dien_tich_san, label: Tổng diện tích sàn, type: area, source: property.nha.dien_tich_san, format: vn_decimal,
+     suffix: " m²", fill: printed}
+  - {name: nam_xay_dung, label: Năm xây dựng, type: year, source: property.nha.nam_xay_dung, fill: printed}
+  - {name: pham_vi, label: Phạm vi thu hồi, type: text, source: thu_hoi.pham_vi_text, fill: printed}
+
+  - {name: tong_cong, label: Tổng cộng, type: money, source: thu_hoi.tien_bt_cong_trinh, format: vn_group, fill: printed}
+  - {name: tong_bang_chu, label: Bằng chữ, type: money_words, source: thu_hoi.tien_bt_cong_trinh, format: vn_words,
+     suffix: " đồng", fill: printed}
+
+  - {name: ngay_lap, label: Ngày lập, type: date, source: doc.issue_date, format: "ngày %d tháng %m năm %Y", fill: printed}
+  - {name: nguoi_lap, label: Người lập, type: person_name, gen: person_name, fill: printed}
+  - {name: nguoi_kiem_tra, label: Người kiểm tra, type: person_name, gen: person_name, fill: printed}
+  - {name: chuc_vu_duyet, label: Chức vụ người duyệt, type: text, gen: choice,
+     params: {values: [CHỦ TỊCH, "KT. CHỦ TỊCH - PHÓ CHỦ TỊCH"]}, fill: printed}
+  - {name: nguoi_duyet, label: Người duyệt, type: person_name, gen: person_name, fill: printed}
+
+# Mỗi hạng mục một dòng: ct1 luôn là nhà ở chính, sau đó sân, tường rào, giếng (nếu có).
+groups:
+  - name: ct
+    items: thu_hoi.cong_trinh
+    max: 6
+    fields:
+      - {name: hang_muc, label: Hạng mục, type: text, source: item.hang_muc, fill: printed}
+      - {name: ket_cau, label: Kết cấu, type: text, source: item.ket_cau, fill: printed}
+      - {name: don_vi, label: Đơn vị tính, type: text, source: item.don_vi, fill: printed}
+      - {name: khoi_luong, label: Khối lượng, type: number, source: item.khoi_luong, format: vn_decimal, fill: printed}
+      - {name: don_gia, label: Đơn giá xây mới (đ), type: money, source: item.don_gia, format: vn_group, fill: printed}
+      - {name: ty_le, label: Tỷ lệ chất lượng còn lại, type: percent, source: item.ty_le, suffix: "%", fill: printed}
+      - {name: gia_tri_hien_co, label: Giá trị hiện có (đ), type: money, source: item.gia_tri_hien_co, format: vn_group, fill: printed}
+      - {name: bo_sung, label: Bổ sung đủ 60% giá xây mới (đ), type: money, source: item.bo_sung, format: vn_group, fill: printed}
+      - {name: thanh_tien, label: Thành tiền (đ), type: money, source: item.thanh_tien, format: vn_group, fill: printed}
+
+decorations:
+  - {kind: signature, anchor: nguoi_duyet}
+  - {kind: stamp, anchor: nguoi_duyet}

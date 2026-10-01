@@ -47,9 +47,13 @@
       "type": "object",
       "description": "Thửa đất và nhà dùng chung: số thửa, tờ bản đồ, polygon (mét), cạnh, diện tích, tứ cận, giá sang"
     },
+    "thu_hoi": {
+      "type": "object",
+      "description": "Đợt thu hồi đất (thủ tục có thu_hoi, ví dụ giai-toa-den-bu-tphcm): dự án, số và ngày quyết định, phạm vi, diện tích thu hồi, giá đất, các dòng bảng chiết tính đất và công trình, hạn và ngày bàn giao, suất tái định cư (generator/thu_hoi.py)"
+    },
     "compensation": {
       "type": "object",
-      "description": "Nhãn cho đánh giá cuối của hồ sơ giải tỏa đền bù, tính từ dữ liệu đúng (không bị ca lỗi sửa): nguoi_dung_ten, nguoi_dai_dien, nguoi_thua_ke, ngay_bat_dau_su_dung_dat, nguon_goc_dat, so_thua, to_ban_do, dien_tich_dat, dien_tich_xay_dung, dien_tich_san, so_tang, ket_cau, nhan_khau"
+      "description": "Nhãn cho đánh giá cuối của hồ sơ giải tỏa đền bù, tính từ dữ liệu đúng (không bị ca lỗi sửa): nguoi_dung_ten, nguoi_dai_dien, nguoi_thua_ke, ngay_bat_dau_su_dung_dat, nguon_goc_dat, so_thua, to_ban_do, dien_tich_dat, dien_tich_xay_dung, dien_tich_san, so_tang, ket_cau, nhan_khau. Thủ tục có thu_hoi thêm: pham_vi_thu_hoi, dien_tich_thu_hoi, gia_dat, tien_bt_dat, tien_bt_cong_trinh, ban_giao_dung_han, tien_thuong, tai_dinh_cu, tong_bt_ht"
     },
     "documents": {
       "type": "array",

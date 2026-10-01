@@ -1,0 +1,53 @@
+{% extends "_shared/base.html.j2" %}
+{#- Bảng chiết tính bồi thường về đất: A4 ngang, in máy, bảng nhiều dòng, tổng bằng số và bằng chữ, ba chữ ký. -#}
+{% block head %}{% include "giai-toa-den-bu-tphcm/_bt.css.j2" %}{% endblock %}
+{% block body %}
+<section {{ page_attrs() }}>
+  <div class="hdr">
+    <div class="hdr-left">
+      <div class="bold">ỦY BAN NHÂN DÂN</div>
+      <div class="bold">{{ field("co_quan", "plain") }}</div>
+    </div>
+    {{ quoc_hieu() }}
+  </div>
+  <div class="title">BẢNG CHIẾT TÍNH BỒI THƯỜNG, HỖ TRỢ VỀ ĐẤT</div>
+  <div class="center italic">(Kèm theo Quyết định số {{ field("so_qd", "plain") }} ngày {{ field("ngay_qd", "plain") }} của Ủy ban nhân dân)</div>
+  <div class="center">Dự án: {{ field("ten_du_an", "plain bold") }}</div>
+
+  <div class="info">
+    <div>Chủ sử dụng: {{ field("chu_su_dung", "plain bold") }}</div>
+    <div>Người nhận: {{ field("nguoi_nhan", "plain") }} &nbsp; Số định danh: {{ field("so_cccd", "plain") }}</div>
+    <div class="wide">{{ field("ghi_chu_dai_dien", "plain italic") }}</div>
+    <div class="wide">Địa chỉ thửa đất: {{ field("dia_chi_thua_dat", "plain") }}</div>
+    <div>Thửa số: {{ field("so_thua", "plain") }} &nbsp; Tờ bản đồ số: {{ field("to_ban_do", "plain") }}</div>
+    <div>Diện tích theo GCN: {{ field("dien_tich_gcn", "plain") }} &nbsp; Thu hồi: {{ field("dien_tich_thu_hoi", "plain bold") }}</div>
+    <div class="wide">Phạm vi: {{ field("pham_vi", "plain") }}</div>
+  </div>
+
+  <table class="grid calc">
+    <thead><tr><th style="width: 8mm;">STT</th><th>Nội dung</th><th>Diện tích (m²)</th><th>Đơn giá (đ/m²)</th>
+      <th>Tỷ lệ</th><th>Thành tiền (đ)</th></tr></thead>
+    <tbody>
+    {%- for i in range(1, doc.groups.d + 1) %}{% set p = "d%d_" % i %}
+    <tr><td class="center">{{ i }}</td><td>{{ field(p ~ "noi_dung", "plain") }}</td>
+      <td class="num">{{ field(p ~ "dien_tich", "plain") }}</td><td class="num">{{ field(p ~ "don_gia", "plain") }}</td>
+      <td class="num">{{ field(p ~ "ty_le", "plain") }}</td><td class="num">{{ field(p ~ "thanh_tien", "plain") }}</td></tr>
+    {%- endfor %}
+    <tr class="total"><td></td><td colspan="4">TỔNG CỘNG</td><td class="num">{{ field("tong_cong", "plain") }}</td></tr>
+    </tbody>
+  </table>
+  <div class="row">Bằng chữ: {{ field("tong_bang_chu", "plain italic") }}</div>
+
+  <div class="signs">
+    <div class="sign-block"><div class="bold">NGƯỜI LẬP</div>{{ signature(doc.doc_id ~ "lap", 110, 40) }}<div>{{ field("nguoi_lap", "plain") }}</div></div>
+    <div class="sign-block"><div class="bold">NGƯỜI KIỂM TRA</div>{{ signature(doc.doc_id ~ "kt", 110, 40) }}<div>{{ field("nguoi_kiem_tra", "plain") }}</div></div>
+    <div class="sign-block approver">
+      <div class="italic">{{ field("ngay_lap", "plain") }}</div>
+      <div class="bold">{{ field("chuc_vu_duyet", "plain") }}</div>
+      {{ signature(doc.doc_id ~ "duyet", 130, 45) }}
+      <div class="bold">{{ field("nguoi_duyet", "plain") }}</div>
+      {{ stamp_at("duyet", "-4mm", "4mm", 110) }}
+    </div>
+  </div>
+</section>
+{% endblock %}

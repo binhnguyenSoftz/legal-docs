@@ -116,8 +116,10 @@ def make(rng: random.Random, dob: date, gender: str, as_of: date, ho: str | None
 
 
 def build(rng: random.Random, as_of: date, age: tuple[int, int] = (18, 70), gender: str = "any",
-          card: str | None = None, ho: str | None = None) -> dict:
+          card: str | None = None, ho: str | None = None, province: str | None = None) -> dict:
+    """province: nơi thường trú của người nộp (và nhà đất của hồ sơ) thuộc tỉnh/thành phố này."""
     if gender == "any":
         gender = rng.choice(["male", "female"])
     dob = dates.dob_for_age(rng, age[0], age[1], as_of)
-    return make(rng, dob, gender, as_of, ho=ho, card=card)
+    thuong_tru = address.generate(rng, province) if province else None
+    return make(rng, dob, gender, as_of, ho=ho, card=card, thuong_tru=thuong_tru)

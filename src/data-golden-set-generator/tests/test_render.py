@@ -21,10 +21,11 @@ def renderer():
     r.close()
 
 
-@pytest.mark.parametrize("index", [0, 1])
-def test_every_printed_field_has_bbox(renderer, tmp_path, index):
+@pytest.mark.parametrize("procedure,index", [("giai-toa-den-bu", 0), ("giai-toa-den-bu", 1),
+                                             *[("giai-toa-den-bu-tphcm", i) for i in range(4)]])
+def test_every_printed_field_has_bbox(renderer, tmp_path, procedure, index):
     from generator.render import pick_style
-    proc = spec.load_procedure("giai-toa-den-bu")
+    proc = spec.load_procedure(procedure)
     d = dossier.build(proc, 3, index)
     style = pick_style(random.Random(derive_seed(d["seed"], "style")))
     for doc in d["documents"]:

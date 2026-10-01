@@ -148,10 +148,11 @@ class Renderer:
 
     def render(self, procedure: str, doc: dict, dossier: dict, style: dict, out_dir: Path) -> None:
         """Ghi <doc_id>.html/.pdf/_p<N>.png vào out_dir, điền doc['files'] và bbox (pixel ảnh) vào từng trường."""
-        template = self.env.get_template(f"{procedure}/{doc['doc_type']}/template.html.j2")
+        # doc["template"]: giấy tờ dùng lại từ thủ tục khác (`from` trong procedure.yaml) có template ở thư mục đó.
+        template = self.env.get_template(doc.get("template") or f"{procedure}/{doc['doc_type']}/template.html.j2")
         html = template.render(doc=doc, fields=doc["fields"], persona=dossier["persona"], dossier=dossier, style=style,
                                people=dossier.get("people"), property=dossier.get("property"),
-                               timeline=dossier.get("timeline"))
+                               timeline=dossier.get("timeline"), thu_hoi=dossier.get("thu_hoi"))
         html_path = out_dir / f"{doc['doc_id']}.html"
         html_path.write_text(html, encoding="utf-8")
 

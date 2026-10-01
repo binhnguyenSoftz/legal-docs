@@ -1,0 +1,52 @@
+doc_type: khen-thuong
+version: 1
+title: Quyết định thưởng bàn giao mặt bằng đúng hạn
+source_form: "[CẦN XÁC NHẬN] Quyết định hành chính của UBND cấp xã, một hộ một quyết định"
+pages: 1
+
+issue_date:
+  source: thu_hoi.ngay_qd_thuong
+
+render:
+  page: a4
+  paper: white
+  age: [0, 0.08]
+
+# Nhãn suy luận (QĐ 11/2026 TP.HCM, R11): chỉ có khi ngay_ban_giao <= han_ban_giao.
+#   thu hồi toàn bộ: so_tien = min(tiền bồi thường đất, 50.000.000)
+#   thu hồi một phần: so_tien = min(50% tiền bồi thường đất, 25.000.000)
+fields:
+  - {name: co_quan, label: UBND cấp xã, type: organization, source: thu_hoi.co_quan, transform: upper, fill: printed}
+  - {name: so_qd, label: Số quyết định, type: text, source: thu_hoi.so_qd_thuong, fill: printed}
+  - {name: ngay_qd, label: Ngày quyết định, type: date, source: doc.issue_date, format: "ngày %d tháng %m năm %Y", fill: printed}
+  - {name: ten_du_an, label: Dự án, type: text, source: thu_hoi.ten_du_an, fill: printed}
+  - {name: so_qd_thu_hoi, label: Quyết định thu hồi đất số, type: text, source: thu_hoi.so_qd, fill: printed}
+  - {name: ngay_qd_thu_hoi, label: Ngày quyết định thu hồi, type: date, source: thu_hoi.ngay_qd, fill: printed}
+  - {name: han_ban_giao, label: Thời hạn bàn giao mặt bằng, type: date, source: thu_hoi.han_ban_giao, fill: printed}
+  - {name: ngay_ban_giao, label: Ngày bàn giao (theo biên bản), type: date, source: thu_hoi.ngay_ban_giao, fill: printed}
+  - {name: nguoi_duoc_thuong, label: Người được thưởng, type: person_name, source: people.nguoi_nop.ho_ten, fill: printed}
+  - name: dai_dien_cho
+    label: Đại diện cho
+    type: text
+    gen: template
+    params: {text: "những người thừa kế của {people.nguoi_mat.xung_ho} {people.nguoi_mat.ho_ten}"}
+    fill: printed
+  - name: dia_chi_thua_dat
+    label: Địa chỉ thửa đất thu hồi
+    type: address
+    gen: address_at
+    params: {source: property.dia_chi_parts}
+    fill: printed
+  - {name: pham_vi, label: Phạm vi thu hồi, type: text, source: thu_hoi.pham_vi_text, fill: printed}
+  - {name: dien_tich_thu_hoi, label: Diện tích thu hồi, type: area, source: thu_hoi.dien_tich, format: vn_decimal,
+     suffix: " m²", fill: printed}
+  - {name: so_tien, label: Số tiền thưởng, type: money, source: thu_hoi.tien_thuong, format: vn_group, suffix: " đồng", fill: printed}
+  - {name: so_tien_bang_chu, label: Bằng chữ, type: money_words, source: thu_hoi.tien_thuong, format: vn_words, suffix: " đồng",
+     fill: printed}
+  - {name: chuc_vu_ky, label: Chức vụ người ký, type: text, gen: choice,
+     params: {values: [CHỦ TỊCH, "KT. CHỦ TỊCH - PHÓ CHỦ TỊCH"]}, fill: printed}
+  - {name: nguoi_ky, label: Người ký, type: person_name, gen: person_name, fill: printed}
+
+decorations:
+  - {kind: signature, anchor: nguoi_ky}
+  - {kind: stamp, anchor: nguoi_ky}

@@ -2,7 +2,9 @@
 
 Tài liệu này dùng để **chốt nhãn và quy tắc gán** trước khi viết `schema.yaml`, template và sinh dữ liệu train. Các mục có `[CẦN XÁC NHẬN]` là giả định, cần đối chiếu hồ sơ thật hoặc chuyên viên trước khi code.
 
-Trạng thái: bản nháp, chưa có code. Ngày lập: 2026-10-01.
+Trạng thái: đã chốt (mục 8) và đã code ở thủ tục `giai-toa-den-bu-tphcm`, `generator/thu_hoi.py`. Ngày lập: 2026-10-01.
+
+Mục 2-6 là đề xuất ban đầu. Chỗ nào code khác đề xuất thì ghi ở mục 8.2; nguồn sự thật là `schema.yaml` của từng giấy tờ.
 
 ## 1. Tổng quan
 
@@ -10,7 +12,7 @@ Trạng thái: bản nháp, chưa có code. Ngày lập: 2026-10-01.
 
 | # | `doc_type` đề xuất | Tên đầy đủ | Ai lập | Vai trò trong hồ sơ |
 |---|---|---|---|---|
-| 1 | `giay-xac-nhan-1131` | GXN 1131 `[CẦN XÁC NHẬN]` tên và mẫu, giả định ở mục 2 | UBND cấp xã | Đầu vào: xác nhận nguồn gốc, thời điểm sử dụng đất, tình trạng tranh chấp |
+| 1 | `gxn-1131` | GXN 1131 `[CẦN XÁC NHẬN]` tên và mẫu, giả định ở mục 2 | UBND cấp xã | Đầu vào: xác nhận nguồn gốc, thời điểm sử dụng đất, tình trạng tranh chấp |
 | 2 | `bt-dat` | Bảng chiết tính bồi thường, hỗ trợ về đất | Đơn vị bồi thường, UBND cấp xã phê duyệt | Kết quả: tiền bồi thường đất |
 | 3 | `bt-cong-trinh` | Bảng chiết tính bồi thường nhà, công trình, vật kiến trúc | Như trên | Kết quả: tiền bồi thường tài sản trên đất |
 | 4 | `khen-thuong` | Quyết định thưởng bàn giao mặt bằng trước thời hạn | UBND cấp xã | Kết quả: tiền thưởng tiến độ |
@@ -133,7 +135,9 @@ dong_chenh     = max(0, thu_hoi.dien_tich - dien_tich_gcn) × gia_dat × ty_le(n
 tien_bt_dat    = dong_gcn + dong_chenh
 ```
 
-`ty_le(nguon_goc)` `[CẦN XÁC NHẬN]` theo quy định địa phương. Đề xuất tạm: trước 18/12/1980 = 100%, 1980-15/10/1993 = 100% trong hạn mức, từ 15/10/1993 = 60%.
+`ty_le(nguon_goc)` `[CẦN XÁC NHẬN]` theo quy định địa phương.
+
+> Lưu ý: bản đã code chỉ có dòng `dong_gcn` (100%). Hồ sơ hợp lệ hiện có diện tích bản vẽ bằng giấy chứng nhận, nên không có phần chênh lệch. Thêm phần chênh lệch là việc sau (mục 8.3).
 
 Quy tắc kiểm tra trên giấy tờ:
 
@@ -253,53 +257,59 @@ tien_chenh_lech       = gia_tdc - tien_bt_dat - ho_tro_suat_toi_thieu      # âm
 - Số suất: mặc định 1 suất/hộ. Hộ có con đã lập gia đình cùng ở (con dâu/rể trong hộ khẩu) có thể được xét thêm suất `[CẦN XÁC NHẬN]`. Đề xuất bản đầu luôn 1 suất.
 - `gia_suat_toi_thieu` và `tien_tu_lo` `[CẦN XÁC NHẬN]` số liệu.
 
-## 7. Nhãn hồ sơ, quy tắc và ca lỗi đề xuất
+## 7. Nhãn hồ sơ, quy tắc và ca lỗi
 
-### 7.1. Bổ sung `ground_truth.json > compensation`
+### 7.1. Bổ sung `ground_truth.json`
+
+Mục mới `thu_hoi` chứa toàn bộ đợt thu hồi (dự án, số và ngày quyết định, các dòng bảng tính, hạn và ngày bàn giao, suất tái định cư). Mục `compensation` thêm các nhãn suy luận:
 
 ```json
 {
-  "gxn": {"thoi_diem_su_dung": "1988-04-12", "nguon_goc_dat": "1980-15-10-1993", "khong_tranh_chap": true},
-  "thu_hoi": {"pham_vi": "toan-bo", "dien_tich": 68.5, "gia_dat": 52000000,
-              "han_ban_giao": "2026-05-30", "ngay_ban_giao": "2026-05-20"},
-  "tien_bt_dat": 3562000000,
-  "tien_bt_cong_trinh": 845300000,
-  "tien_thuong": 50000000,
-  "tai_dinh_cu": {"du_dieu_kien": true, "hinh_thuc": "can-ho", "so_suat": 1, "tien_chenh_lech": -1250000000},
-  "tong_nhan": 4457300000
+  "pham_vi_thu_hoi": "mot-phan",
+  "dien_tich_thu_hoi": 69.2,
+  "gia_dat": 35541000,
+  "tien_bt_dat": 2459437200,
+  "tien_bt_cong_trinh": 138319500,
+  "ban_giao_dung_han": true,
+  "tien_thuong": 25000000,
+  "tai_dinh_cu": {"du_dieu_kien": true, "hinh_thuc": "tu-lo-cho-o", "so_suat": 1, "nhan_khau": 4,
+                  "tien_phai_nop": 0, "tien_duoc_nhan": 0},
+  "tong_bt_ht": 2745728700
 }
 ```
 
-Toàn bộ số liệu tính từ dữ liệu đúng, không bị ca lỗi sửa (giống `compensation` hiện có).
+Toàn bộ số liệu tính từ dữ liệu đúng, không bị ca lỗi sửa. Ví dụ ca M17 (thưởng dù bàn giao trễ): giấy khen thưởng ghi 50 triệu, nhãn `tien_thuong` vẫn là 0. `tong_bt_ht` = đất + công trình + thưởng + hỗ trợ suất tối thiểu + hỗ trợ tự lo chỗ ở.
 
 ### 7.2. Quy tắc mới
 
 | Mã | Quy tắc |
 |---|---|
-| R07 | GXN: thời điểm sử dụng đất, diện tích phải khớp giấy sang đất, giấy chứng nhận, bản vẽ hiện trạng |
-| R08 | Giấy tờ đầu ra phải ghi đúng người: chủ sử dụng là người đứng tên đã mất, người nhận là người đại diện |
-| R09 | Diện tích bồi thường không vượt diện tích thu hồi và diện tích đo thực tế |
+| R07 | GXN 1131 phải khớp giấy sang đất, giấy chứng nhận, bản vẽ hiện trạng về thời điểm sử dụng đất và thửa đất |
+| R08 | Giấy tờ bồi thường phải ghi đúng chủ sử dụng (người đứng tên đã mất) và người đại diện nhận tiền |
+| R09 | Diện tích tính bồi thường không vượt diện tích thu hồi |
 | R10 | Số tiền trên bảng chiết tính phải đúng công thức: thành tiền từng dòng, tổng cộng, bằng chữ khớp bằng số |
-| R11 | Thưởng chỉ khi bàn giao đúng hoặc trước hạn, không vượt mức trần |
-| R12 | Tái định cư chỉ bố trí cho hộ đủ điều kiện; số nhân khẩu khớp sổ hộ khẩu |
-| R13 | Thứ tự ngày: GXN → quyết định thu hồi → bảng chiết tính → bàn giao → khen thưởng |
+| R11 | Chỉ thưởng khi bàn giao đúng hạn, không vượt mức trần |
+| R12 | Số nhân khẩu trên quyết định tái định cư phải khớp sổ hộ khẩu |
+| R13 | Thứ tự ngày: GXN, quyết định thu hồi và bảng chiết tính, bàn giao, khen thưởng |
 
 ### 7.3. Ca lỗi
 
-| Mã | `kind` | Giấy tờ, trường | `perturb` | Kỳ vọng |
+| Mã | `kind` | Giấy tờ, trường | Cách gây lỗi | Kỳ vọng |
 |---|---|---|---|---|
-| M10 | `field_conflict` | `giay-xac-nhan-1131.thoi_diem_su_dung` | sang mốc khác | `request_supplement`, R07 |
+| M10 | `field_conflict` | `gxn-1131.thoi_diem_su_dung` | `year_shift` (lệch 1-3 năm) | `request_supplement`, R07 |
 | M11 | `field_conflict` | `bt-dat.chu_su_dung` | `typo_name` | `request_supplement`, R08 |
-| M12 | `field_value` | `bt-dat.tong_cong` | `swap_digits` | `request_supplement`, R10 |
-| M13 | `field_value` | `bt-dat.tong_bang_chu` | lệch một hàng đơn vị | `request_supplement`, R10 |
-| M14 | `field_value` | `bt-dat.d1_dien_tich` | lớn hơn diện tích thu hồi | `request_supplement`, R09 |
-| M15 | `field_value` | `bt-cong-trinh.bo_sung_san_60` | bỏ dòng bổ sung | `request_supplement`, R10 |
-| M16 | `field_value` | `khen-thuong.so_tien` | vượt trần | `request_supplement`, R11 |
-| M17 | `date_order` | `khen-thuong` khi `ngay_ban_giao > han_ban_giao` | | `request_supplement`, R11 |
-| M18 | `field_conflict` | `tai-dinh-cu.so_nhan_khau` | ±1 | `request_supplement`, R12 |
-| M19 | `date_order` | `bt-dat.ngay_lap` trước `thu_hoi.ngay_qd` | | `request_supplement`, R13 |
+| M12 | `field_conflict` | `bt-dat.tong_cong` | `money_swap` (đảo 2 chữ số) | `request_supplement`, R10 |
+| M13 | `field_conflict` | `bt-dat.tong_bang_chu` | `money_shift` (lệch 1-20 triệu) | `request_supplement`, R10 |
+| M14 | `field_conflict` | `bt-dat.d1_dien_tich` | `area_up` (lớn hơn 5-25%) | `request_supplement`, R09 |
+| M15 | `calc_error` | `bt-cong-trinh.ct1_thanh_tien` | quên bổ sung 60%, hoặc lệch 5-15% | `request_supplement`, R10 |
+| M16 | `field_value` | `khen-thuong.so_tien` (+ bằng chữ) | 60, 75 hoặc 100 triệu | `request_supplement`, R11 |
+| M17 | `thu_hoi_override` | có `khen-thuong` dù bàn giao trễ | | `request_supplement`, R11 |
+| M18 | `field_conflict` | `tai-dinh-cu.so_nhan_khau` | `int_shift` (±1) | `request_supplement`, R12 |
+| M19 | `date_order` | `bt-dat.ngay_lap` trước ngày GXN | `before` | `request_supplement`, R13 |
 
-> Lưu ý: M12, M13, M15 sửa số trên giấy tờ nhưng các số khác vẫn đúng. Mô hình chỉ phát hiện được khi tự tính lại, không thể so khớp chuỗi giữa các giấy tờ. Đây là ca kiểm tra AIP-011.
+> Lưu ý: M12, M13, M15 chỉ sửa một số, các số khác vẫn đúng. Mô hình chỉ phát hiện được khi tự tính lại, không so khớp chuỗi giữa các giấy tờ được. Đây là ca kiểm tra AIP-011.
+
+M16, M17, M18 khai báo `needs` (cần có giấy khen thưởng, cần bàn giao trễ, cần có giấy tái định cư). Generator chỉ chọn các ca này khi kịch bản biến thể của hồ sơ cho phép.
 
 ### 7.4. Trục biến thể mới (`coverage`)
 
@@ -307,31 +317,53 @@ Toàn bộ số liệu tính từ dữ liệu đúng, không bị ca lỗi sửa
 |---|---|---|
 | `pham_vi` | `toan-bo`, `mot-phan` | Diện tích thu hồi, mức thưởng, điều kiện TĐC |
 | `ban_giao` | `dung-han`, `tre-han` | Có hay không có `khen-thuong` |
-| `tdc` | `can-ho`, `nen-dat`, `tu-lo-cho-o`, `khong` | Biến thể `tai-dinh-cu` |
+| `tdc` | `can-ho`, `nen-dat`, `tu-lo-cho-o`, `khong` | Biến thể hoặc không có `tai-dinh-cu` |
 
-Nhân thẳng vào 108 tổ hợp hiện có sẽ thành 1.728 tập mới phủ đủ. Đề xuất: ba trục mới xoay vòng độc lập với 5 trục cũ (lệch pha theo số thứ tự), để mỗi giá trị vẫn xuất hiện đều mà không cần phủ hết tích Descartes. Cần sửa `dossier.plan()`.
+Ba trục mới đặt trước 5 trục cũ nên đổi nhanh nhất: 16 hồ sơ đầu phủ mọi tình huống bồi thường, 1.728 hồ sơ phủ mọi tổ hợp. Không cần sửa `dossier.plan()`.
 
-> Lưu ý: hiện README ghi "mỗi tập luôn đủ 7 giấy tờ, không có ca thiếu giấy tờ". Với `ban_giao: tre-han` và `tdc: khong`, hồ sơ hợp lệ sẽ **không có** `khen-thuong` hoặc `tai-dinh-cu`. Cần đổi `required` sang điều kiện, và nhãn cần phân biệt "không có vì không đủ điều kiện" với "thiếu giấy tờ".
+Hồ sơ hợp lệ có thể **không có** `khen-thuong` (bàn giao trễ) hoặc `tai-dinh-cu` (không đủ điều kiện). Hai giấy tờ này khai báo `when` trong `procedure.yaml`. Khi không có vì không đủ điều kiện, generator không ghi vào `missing_documents`, vì đây không phải lỗi thiếu giấy tờ.
 
-## 8. Câu hỏi cần chốt trước khi code
+## 8. Các quyết định đã chốt
 
-1. **GXN 1131 là giấy gì?** Số 1131 là số mẫu, số quyết định, hay mã nội bộ? Cần một bản mẫu (đã che thông tin) để dựng template. Nếu không phải giấy xác nhận nguồn gốc đất, mục 2 và R07, M10 phải làm lại.
-2. **Bốn giấy tờ đầu ra là đầu vào hay đầu ra của hệ thống?** Nếu hệ thống đọc chúng (thủ tục chi trả, khiếu nại) thì nhãn chính là trích xuất + kiểm tra số học. Nếu hệ thống phải *sinh ra* chúng (AIP-023) thì nhãn chính là số liệu ở mục 7.1, còn ảnh giấy tờ chỉ dùng làm ví dụ đầu ra.
-3. **Bồi thường đất và công trình** là hai tờ riêng hay chung một bảng chiết tính? Có tách quyết định phê duyệt và bảng chi tiết không?
-4. **Địa bàn và bộ quy định:** chỉ TP.HCM theo QĐ 11/2026, hay cần nhiều tỉnh? Đơn giá xây mới, bảng khấu hao, giá suất TĐC tối thiểu lấy từ đâu?
-5. **Hỗ trợ** (tạm cư, di chuyển, ổn định đời sống) có cần làm thành giấy tờ hoặc dòng riêng không? Hiện chưa có trong danh sách.
-6. **Khen thưởng và tái định cư** có lập theo danh sách nhiều hộ không? Nếu có, cần thêm hộ "nhiễu" để mô hình phải tìm đúng dòng của hộ mình.
+### 8.1. Trả lời câu hỏi mở
 
-## 9. Việc làm sau khi chốt
+| # | Câu hỏi | Đã chốt |
+|---|---|---|
+| 1 | GXN 1131 là giấy gì? | Giữ giả định: giấy UBND cấp xã xác nhận nguồn gốc, thời điểm sử dụng đất. `doc_type: gxn-1131`. Vẫn `[CẦN XÁC NHẬN]` khi có mẫu thật |
+| 2 | Giấy tờ đầu ra là đầu vào hay đầu ra của hệ thống? | Làm cả hai. Mỗi trường có nhãn trích xuất + bbox; `compensation` có số đúng để chấm phần tự tính |
+| 3 | Đất và công trình chung hay riêng? | Hai tờ riêng (`bt-dat`, `bt-cong-trinh`), mỗi tờ một bố cục A4 ngang |
+| 4 | Địa bàn | Chỉ TP.HCM (địa giới sau 01/7/2025), Quyết định 11/2026/QĐ-UBND. Thủ tục riêng `giai-toa-den-bu-tphcm`, thủ tục cũ giữ nguyên |
+| 5 | Hỗ trợ (tạm cư, di chuyển...) | Chưa làm. Chỉ có hỗ trợ đủ suất TĐC tối thiểu và hỗ trợ tự lo chỗ ở |
+| 6 | Danh sách nhiều hộ | Không. Mỗi quyết định một hộ |
 
-1. Thêm `generator/thu_hoi.py`: dựng đối tượng `thu_hoi`, bảng đơn giá, các hàm tính ở mục 3-6.
-2. Thêm kiểu trường `money`, `money_words`, `percent` và `perturb` cho số tiền.
-3. Viết `schema.yaml` + `template.html.j2` cho 5 giấy tờ dưới `templates/giai-toa-den-bu/`. Bảng chiết tính dùng `page: a4` ngang.
-4. Mở rộng `procedure.yaml`: giấy tờ, rule R07-R13, mutation M10-M19, trục coverage.
-5. Viết test: hồ sơ hợp lệ thì mọi phép tính ở mục 3-6 khớp; mỗi mutation đổi đúng một trường.
-6. Sinh thử 5 hồ sơ, so với mẫu thật, nhờ chuyên viên duyệt.
+### 8.2. Chỗ code khác đề xuất ban đầu
 
-## 10. Tài liệu tham chiếu
+- Bồi thường đất chỉ có một dòng "Đất ở (có giấy chứng nhận)", tỷ lệ 100% (xem mục 3.3).
+- Thủ tục mới tách khỏi `giai-toa-den-bu`, dùng lại 7 giấy tờ đầu vào bằng khóa `from`. Vì vậy hồ sơ thủ tục cũ sinh ra giống hệt trước khi có thay đổi này.
+- Ngày nộp hồ sơ trong 01/3-31/5/2026, để mọi giấy tờ đầu ra lập sau ngày Quyết định 11/2026 có hiệu lực (06/3/2026).
+- Thu hồi một phần: nếu phần đất còn lại dưới 36 m² thì không đủ để ở. Khi đó nhà bị tính bồi thường cả căn, và hộ đủ điều kiện tái định cư nếu không có chỗ ở khác.
+
+### 8.3. Số liệu giả lập cần thay bằng số thật
+
+Tất cả nằm ở đầu `generator/thu_hoi.py`:
+
+| Hằng số | Giá trị đang dùng |
+|---|---|
+| `BUILD_PRICE` | Đơn giá xây mới 3,2-7,2 triệu/m² sàn theo kết cấu; niên hạn 30-80 năm |
+| `MIN_REMAINING_RATE` | Tỷ lệ chất lượng còn lại thấp nhất 20% |
+| `YARD_PRICE`, `FENCE_PRICE`, `WELL_PRICE` | Sân 165.000 đ/m², tường rào 720.000 đ/m, giếng 3,5 triệu |
+| `MIN_RESIDUAL` | Diện tích còn lại tối thiểu để ở: 36 m² |
+| `MIN_APARTMENT`, `MIN_LOT` | Suất TĐC tối thiểu: căn hộ 36 m², nền 50 m² |
+| `SELF_ARRANGE_RATE` | Hỗ trợ tự lo chỗ ở: 5% tiền bồi thường đất |
+| Giá đất | Phường 30-250 triệu/m², xã 5-40 triệu/m² (ngẫu nhiên) |
+
+Việc tiếp theo:
+
+1. Có mẫu GXN 1131 thật thì sửa schema và template `gxn-1131`.
+2. Thêm phần diện tích chênh lệch (bản vẽ lớn hơn giấy chứng nhận). Khi đó GXN quyết định tỷ lệ bồi thường theo mốc 1980/1993.
+3. Nhờ chuyên viên duyệt khoảng 20 hồ sơ sinh thử.
+
+## 9. Tài liệu tham chiếu
 
 - [Quy định về bồi thường khi thu hồi đất theo Luật Đất đai 2024](https://xaydungchinhsach.chinhphu.vn/chinh-sach-moi-ve-boi-thuong-thu-hoi-dat-theo-luat-dat-dai-2024-119240227145829751.htm)
 - [Toàn văn Nghị định quy định về bồi thường, hỗ trợ, tái định cư](https://xaydungchinhsach.chinhphu.vn/toan-van-nghi-dinh-quy-dinh-ve-boi-thuong-ho-tro-tai-dinh-cu-khi-nha-nuoc-thu-hoi-dat-119240906111916662.htm)

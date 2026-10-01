@@ -93,9 +93,16 @@ def _detail(rng: random.Random, unit: dict) -> tuple[str, str | None]:
                        f"Tổ dân phố {rng.randint(1, 30)}"]), street
 
 
-def generate(rng: random.Random) -> dict:
+def generate(rng: random.Random, province: str | None = None) -> dict:
+    """province: chỉ lấy địa chỉ thuộc tỉnh/thành phố này (tên sau 01/7/2025), ví dụ 'Thành phố Hồ Chí Minh'."""
     urban, rural = _split()
-    unit = rng.choice(urban if rng.random() < URBAN_RATE else rural)
+    if province:
+        urban = [u for u in urban if u["new_province"] == province]
+        rural = [u for u in rural if u["new_province"] == province]
+        if not urban and not rural:
+            raise ValueError(f"Không có đơn vị hành chính nào thuộc {province}")
+    want_urban = rng.random() < URBAN_RATE
+    unit = rng.choice(urban if want_urban and urban or not rural else rural)
     detail, street = _detail(rng, unit)
     return {
         "chi_tiet": detail,

@@ -1,0 +1,61 @@
+{% extends "_shared/base.html.j2" %}
+{#- Quyết định bố trí tái định cư: A4 dọc, in máy. Điều 1 rẽ nhánh theo biến thể căn hộ / nền đất / tự lo chỗ ở. -#}
+{% block head %}{% include "giai-toa-den-bu-tphcm/_bt.css.j2" %}{% endblock %}
+{% block body %}
+{%- set v = doc.variant -%}
+<section {{ page_attrs() }}>
+  <div class="hdr">
+    <div class="hdr-left">
+      <div class="bold">ỦY BAN NHÂN DÂN</div>
+      <div class="bold">{{ field("co_quan", "plain") }}</div>
+      <div style="margin-top: 2mm;">Số: {{ field("so_qd", "plain") }}</div>
+    </div>
+    <div>
+      {{ quoc_hieu() }}
+      <div class="right italic">{{ field("ngay_qd", "plain") }}</div>
+    </div>
+  </div>
+
+  <div class="title" style="margin-top: 7mm; margin-bottom: 1mm;">QUYẾT ĐỊNH</div>
+  <div class="center bold">{{ "Về việc hỗ trợ hộ gia đình tự lo chỗ ở" if v == "tu-lo-cho-o" else "Về việc bố trí tái định cư" }}</div>
+  <div class="center">Dự án: {{ field("ten_du_an", "plain") }}</div>
+  <div class="center" style="margin: 3mm 0;">ỦY BAN NHÂN DÂN</div>
+  <div class="dieu italic">Căn cứ Quyết định số {{ field("so_qd_thu_hoi", "plain") }} ngày {{ field("ngay_qd_thu_hoi", "plain") }}
+    của Ủy ban nhân dân về việc thu hồi đất và phê duyệt phương án bồi thường, hỗ trợ, tái định cư;</div>
+
+  <div class="center bold" style="margin: 3mm 0;">QUYẾT ĐỊNH:</div>
+  <div class="dieu"><b>Điều 1.</b> {{ "Hỗ trợ" if v == "tu-lo-cho-o" else "Bố trí tái định cư cho" }}
+    {{ field("nguoi_duoc_bo_tri", "plain bold") }}, số định danh {{ field("so_cccd", "plain") }}, đại diện {{ field("dai_dien_cho", "plain") }},
+    có nhà đất bị thu hồi tại {{ field("dia_chi_thu_hoi", "plain") }}. Số nhân khẩu: {{ field("so_nhan_khau", "plain") }}.</div>
+  <div class="row"><span class="lbl">Hình thức:</span>{{ field("hinh_thuc", "plain bold") }}</div>
+  {%- if v == "can-ho" %}
+  <div class="row"><span class="lbl">Vị trí:</span>{{ field("khu", "plain") }}, {{ field("block", "plain") }}, tầng {{ field("tang", "plain") }}, căn hộ số {{ field("so_can", "plain bold") }}</div>
+  {%- elif v == "nen-dat" %}
+  <div class="row"><span class="lbl">Vị trí:</span>{{ field("khu", "plain") }}, {{ field("lo", "plain") }}, nền số {{ field("so_nen", "plain bold") }}</div>
+  {%- endif %}
+  {%- if v != "tu-lo-cho-o" %}
+  <div class="row"><span class="lbl">Diện tích:</span>{{ field("dien_tich_tdc", "plain") }} &nbsp; Đơn giá: {{ field("don_gia_tdc", "plain") }}</div>
+  <div class="row"><span class="lbl">Giá trị suất tái định cư:</span>{{ field("gia_tdc", "plain") }}</div>
+  {%- endif %}
+  <div class="row"><span class="lbl">Tiền bồi thường về đất:</span>{{ field("tien_bt_dat", "plain") }}</div>
+  <div class="row"><span class="lbl">Giá trị suất TĐC tối thiểu:</span>{{ field("gia_suat_toi_thieu", "plain") }}</div>
+  <div class="row"><span class="lbl">Hỗ trợ đủ suất tối thiểu:</span>{{ field("ho_tro_suat_toi_thieu", "plain") }}</div>
+  {%- if v == "tu-lo-cho-o" %}
+  <div class="row"><span class="lbl">Hỗ trợ tự lo chỗ ở:</span>{{ field("ho_tro_tu_lo", "plain bold") }}</div>
+  {%- else %}
+  <div class="row"><span class="lbl">Số tiền phải nộp thêm:</span>{{ field("tien_phai_nop", "plain bold") }}</div>
+  <div class="row"><span class="lbl">Số tiền được nhận lại:</span>{{ field("tien_duoc_nhan", "plain bold") }}</div>
+  {%- endif %}
+  <div class="dieu"><b>Điều 2.</b> Hộ gia đình liên hệ đơn vị làm nhiệm vụ bồi thường để
+    {{ "nhận tiền hỗ trợ" if v == "tu-lo-cho-o" else "làm thủ tục nhận " ~ ("căn hộ" if v == "can-ho" else "nền đất") }}.</div>
+  <div class="dieu"><b>Điều 3.</b> Quyết định này có hiệu lực kể từ ngày ký.</div>
+
+  <div class="sign">
+    <div class="bold">TM. ỦY BAN NHÂN DÂN</div>
+    <div class="bold">{{ field("chuc_vu_ky", "plain") }}</div>
+    {{ signature(doc.doc_id ~ "ky", 150, 55) }}
+    <div class="bold">{{ field("nguoi_ky", "plain") }}</div>
+    {{ stamp_at("ky", "-6mm", "8mm", 125) }}
+  </div>
+</section>
+{% endblock %}

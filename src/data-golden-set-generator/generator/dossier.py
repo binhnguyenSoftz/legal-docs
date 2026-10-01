@@ -3,13 +3,16 @@
 import random
 from datetime import timedelta
 
-from generator import GENERATOR_VERSION, freeform, mutations, people, persona, property, style
+from generator import GENERATOR_VERSION, freeform, mutations, people, persona, property, style, thu_hoi
 from generator.fields import dates
 from generator.rng import derive_seed, weighted_choice
 from generator.spec import DocSchema, Procedure
 from generator.values import compute_value, dossier_ctx, make_field, resolve_path
 
 PERSONA_OVERRIDE = "persona_override"
+THU_HOI_OVERRIDE = "thu_hoi_override"
+# Ca lỗi áp dụng lúc dựng hồ sơ, không sửa trường sau khi sinh.
+BUILD_TIME = (PERSONA_OVERRIDE, THU_HOI_OVERRIDE)
 # Số lần sinh lại tối đa để khớp kịch bản biến thể. Hết lượt thì lấy lần khớp nhiều chiều nhất.
 MAX_ATTEMPTS = 40
 
@@ -38,10 +41,20 @@ def expected_variants(proc: Procedure, targets: dict[str, str]) -> dict[str, str
     return out
 
 
-def _pick_mutation(rng: random.Random, proc: Procedure) -> dict | None:
+def _compatible(proc: Procedure, m: dict, targets: dict[str, str]) -> bool:
+    """Ca lỗi có `needs` (ví dụ cần có giấy khen thưởng) chỉ chọn khi kịch bản biến thể không mâu thuẫn."""
+    for knob, allowed in m.get("needs", {}).items():
+        dim = next((d["name"] for d in proc.coverage if d.get("knob") == knob), None)
+        if dim in targets and targets[dim] not in allowed:
+            return False
+    return True
+
+
+def _pick_mutation(rng: random.Random, proc: Procedure, targets: dict[str, str] | None = None) -> dict | None:
     if not proc.mutations or rng.random() >= proc.mix.get("invalid", 0):
         return None
-    return weighted_choice(rng, proc.mutations, [m.get("weight", 1) for m in proc.mutations])
+    pool = [m for m in proc.mutations if _compatible(proc, m, targets or {})]
+    return weighted_choice(rng, pool, [m.get("weight", 1) for m in pool])
 
 
 def _pick_variant(rng: random.Random, spec: dict, ctx: dict, forced: str | None = None) -> str | None:
@@ -100,6 +113,7 @@ def _build_document(rng: random.Random, proc: Procedure, doc_type: str, index: i
 
     doc = {
         "doc_id": f"{index:02d}-{doc_type}",
+        "template": schema.template,
         "doc_type": doc_type,
         "schema_version": schema.version,
         "title": schema.title,
@@ -122,7 +136,9 @@ def _knobs(proc: Procedure, targets: dict[str, str]) -> dict:
     """Kịch bản -> tham số điều hướng generator: thế hệ thẻ, thời kỳ người mất."""
     knobs = {}
     for dim in proc.coverage:
-        if dim["name"] in targets and dim.get("knob") in ("persona.card", "people.nam_mat", "people.nguon_goc"):
+        knob = dim.get("knob", "")
+        if dim["name"] in targets and (knob in ("persona.card", "people.nam_mat", "people.nguon_goc")
+                                       or knob.startswith("thu_hoi.")):
             knobs[dim["knob"]] = targets[dim["name"]]
     return knobs
 
@@ -135,11 +151,13 @@ def _build_once(proc: Procedure, master_seed: int, index: int, attempt: int, tar
     forced = expected_variants(proc, targets)
 
     # Ca lỗi chọn bằng rng riêng, không đổi qua các lần sinh lại: sinh lại chỉ để khớp kịch bản biến thể.
-    mutation = _pick_mutation(random.Random(derive_seed(master_seed, proc.name, index, "mutation")), proc)
+    mutation = _pick_mutation(random.Random(derive_seed(master_seed, proc.name, index, "mutation")), proc, targets)
     submit_date = dates.between(rng, dates.parse(proc.submit_date[0]), dates.parse(proc.submit_date[1]))
 
     persona_params = {"age": tuple(proc.persona.get("age", (18, 70))), "gender": proc.persona.get("gender", "any"),
                       "card": knobs.get("persona.card")}
+    if proc.province:
+        persona_params["province"] = proc.province
     if mutation and mutation["kind"] == PERSONA_OVERRIDE:
         persona_params.update({k: tuple(v) if isinstance(v, list) else v for k, v in mutation["params"].items()})
     person = persona.build(rng, submit_date, **persona_params)
@@ -161,18 +179,33 @@ def _build_once(proc: Procedure, master_seed: int, index: int, attempt: int, tar
         dossier["property"] = property.build(rng, person["noi_thuong_tru_parts"], fam["timeline"]["ngay_sang"],
                                              fam["timeline"]["ngay_cap_gcn"])
         dossier["compensation"] = people.compensation(fam, dossier["property"], submit_date)
+        if proc.thu_hoi:
+            if proc.thu_hoi != "tphcm-2026":
+                raise ValueError(f"{proc.name}: thu_hoi không hỗ trợ: {proc.thu_hoi}")
+            # `needs` của ca lỗi ép kịch bản khi sinh không theo coverage (--coverage random).
+            for knob, allowed in (mutation or {}).get("needs", {}).items():
+                if knobs.get(knob) not in allowed:
+                    knobs[knob] = rng.choice(allowed)
+            override = mutation["params"] if mutation and mutation["kind"] == THU_HOI_OVERRIDE else None
+            dossier["thu_hoi"] = thu_hoi.build(rng, dossier, knobs, override)
+            dossier["compensation"] |= thu_hoi.labels(dossier["thu_hoi"], dossier["compensation"]["nhan_khau"])
     elif proc.people:
         raise ValueError(f"{proc.name}: people không hỗ trợ: {proc.people}")
 
     ctx = {**dossier_ctx(dossier), "procedure_title": proc.title}
     for i, d in enumerate(proc.documents, start=1):
+        # `when`: giấy tờ chỉ có khi điều kiện đúng (ví dụ chỉ hộ đủ điều kiện mới có quyết định tái định cư).
+        # Không có vì không đủ điều kiện thì không phải thiếu giấy tờ: không ghi vào missing_documents.
+        if "when" in d and not resolve_path(d["when"], ctx):
+            continue
         dossier["documents"].append(_build_document(rng, proc, d["doc_type"], i, ctx, forced.get(d["doc_type"])))
 
     reasons = []
     if mutation:
-        if mutation["kind"] == PERSONA_OVERRIDE:
+        if mutation["kind"] in BUILD_TIME:
+            what = "Persona" if mutation["kind"] == PERSONA_OVERRIDE else "Đợt thu hồi"
             reasons.append({"rule": mutation["expect"]["rule"], "mutation": mutation["id"],
-                            "detail": f"Persona sinh ngoài điều kiện: {mutation['params']}"})
+                            "detail": f"{what} sinh ngoài điều kiện: {mutation['params']}"})
         else:
             reasons.append(mutations.apply(rng, dossier, proc, mutation))
 
@@ -199,7 +232,14 @@ def _mismatches(proc: Procedure, d: dict, targets: dict[str, str]) -> list[str]:
             bad.append(dim["name"])
         elif dim.get("knob") == "people.nguon_goc" and people.land_era(d["timeline"]["ngay_sang"]) != targets[dim["name"]]:
             bad.append(dim["name"])
+        elif dim.get("knob", "").startswith("thu_hoi.") and _thu_hoi_value(d, dim["knob"]) != targets[dim["name"]]:
+            bad.append(dim["name"])
     return bad
+
+
+def _thu_hoi_value(d: dict, knob: str) -> str:
+    th = d["thu_hoi"]
+    return th["tdc"]["hinh_thuc"] if knob == "thu_hoi.tdc" else th[knob.split(".", 1)[1]]
 
 
 def build(proc: Procedure, master_seed: int, index: int, coverage: bool = True) -> dict:

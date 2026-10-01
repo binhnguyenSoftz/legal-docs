@@ -1,0 +1,56 @@
+{% extends "_shared/base.html.j2" %}
+{#- GXN 1131: giấy xác nhận của UBND cấp xã. danh-may: in máy toàn bộ; dien-tay: mẫu in sẵn, cán bộ điền tay. -#}
+{% block head %}
+<style>
+.hdr { display: flex; justify-content: space-between; align-items: flex-start; }
+.hdr .quoc-hieu { margin: 0; white-space: nowrap; }
+.hdr-left { width: 62mm; text-align: center; font-size: 11pt; }
+.lbl { display: inline-block; min-width: 58mm; }
+.body .row { margin: 2.2mm 0; }
+.sign { width: 85mm; margin-left: auto; text-align: center; position: relative; margin-top: 6mm; }
+.sign .signature { margin: 3mm auto; }
+</style>
+{% endblock %}
+{% block body %}
+{%- set typed = doc.variant == "danh-may" -%}
+{%- set plain = "plain" if typed else "" -%}
+{%- macro f(name, cls="", w=None) %}{{ field(name, (plain ~ " " ~ cls) | trim, None if typed else w) }}{% endmacro -%}
+<section {{ page_attrs() }}>
+  <div class="hdr">
+    <div class="hdr-left">
+      <div class="bold">ỦY BAN NHÂN DÂN</div>
+      <div class="bold">{{ field("co_quan", "plain") }}</div>
+      <div style="margin-top: 2mm;">Số: {{ f("so_van_ban", "", "28mm") }}</div>
+    </div>
+    {{ quoc_hieu() }}
+  </div>
+
+  <div class="title" style="margin-top: 10mm; margin-bottom: 1mm;">GIẤY XÁC NHẬN</div>
+  <div class="center bold" style="margin-bottom: 6mm;">Nguồn gốc, thời điểm sử dụng đất</div>
+
+  <div class="body">
+  <div class="row">Theo đề nghị của {{ f("nguoi_de_nghi", "", "60mm") }}, số định danh cá nhân {{ f("so_cccd", "", "40mm") }},
+    quan hệ với người sử dụng đất: {{ f("quan_he", "", "20mm") }}.</div>
+  <div class="row">Ủy ban nhân dân xác nhận thửa đất như sau:</div>
+  <div class="row"><span class="lbl">1. Người sử dụng đất:</span>{{ f("nguoi_su_dung", "bold", "60mm") }}, sinh năm {{ f("nam_sinh", "", "15mm") }}</div>
+  <div class="row"><span class="lbl">&nbsp;&nbsp;&nbsp;&nbsp;Đã chết ngày:</span>{{ f("ngay_mat", "", "30mm") }}</div>
+  <div class="row"><span class="lbl">2. Địa chỉ thửa đất:</span>{{ f("dia_chi_thua_dat", "", "90mm") }}</div>
+  <div class="row"><span class="lbl">3. Thửa đất số:</span>{{ f("so_thua", "", "18mm") }} &nbsp; Tờ bản đồ số: {{ f("to_ban_do", "", "18mm") }}</div>
+  <div class="row"><span class="lbl">4. Diện tích đang sử dụng:</span>{{ f("dien_tich", "", "30mm") }}</div>
+  <div class="row"><span class="lbl">5. Mục đích sử dụng:</span>{{ f("muc_dich", "", "40mm") }}</div>
+  <div class="row"><span class="lbl">6. Nguồn gốc sử dụng đất:</span>{{ f("nguon_goc", "", "90mm") }}</div>
+  <div class="row"><span class="lbl">7. Thời điểm bắt đầu sử dụng:</span>{{ f("thoi_diem_su_dung", "bold", "30mm") }}</div>
+  <div class="row"><span class="lbl">8. Tình trạng tranh chấp:</span>{{ f("tranh_chap", "", "50mm") }}</div>
+  <div class="row"><span class="lbl">9. Sự phù hợp quy hoạch:</span>{{ f("quy_hoach", "", "90mm") }}</div>
+  <div class="row italic">Giấy xác nhận này dùng để lập phương án bồi thường, hỗ trợ, tái định cư.</div>
+  </div>
+
+  <div class="sign">
+    <div class="italic">{{ field("ngay_ky", "plain") }}</div>
+    <div class="bold">{{ field("chuc_vu_ky", "plain") }}</div>
+    {{ signature(doc.doc_id ~ "ky", 150, 55) }}
+    <div class="bold">{{ field("nguoi_ky", "plain") }}</div>
+    {{ stamp_at("ky", "-6mm", "8mm", 125) }}
+  </div>
+</section>
+{% endblock %}

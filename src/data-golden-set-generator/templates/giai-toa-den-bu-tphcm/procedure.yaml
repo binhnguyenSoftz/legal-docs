@@ -1,0 +1,198 @@
+# Hồ sơ giải tỏa đền bù tại TP.HCM: 7 giấy tờ đầu vào của giai-toa-den-bu + 5 giấy tờ của quá trình bồi thường.
+# Đề xuất, công thức, giả định: specs/de-xuat-giay-to-boi-thuong.md.
+# - GXN 1131: UBND cấp xã xác nhận nguồn gốc, thời điểm sử dụng đất, không tranh chấp (đầu vào lập phương án).
+# - Bảng chiết tính bồi thường đất, công trình: số tiền tính được từ hồ sơ (generator/thu_hoi.py).
+# - Quyết định khen thưởng: chỉ có khi bàn giao mặt bằng đúng hạn.
+# - Quyết định tái định cư: chỉ có khi hộ đủ điều kiện (thu hồi hết đất ở hoặc phần còn lại không đủ để ở,
+#   không có chỗ ở khác trên địa bàn xã).
+# Nhà đất và gia đình đều ở TP.HCM (địa giới sau 01/7/2025, gồm cả Bình Dương, Bà Rịa - Vũng Tàu cũ).
+
+procedure: giai-toa-den-bu-tphcm
+title: Bồi thường, hỗ trợ, tái định cư khi Nhà nước thu hồi đất tại TP.HCM
+legal_basis:
+  - "[CẦN XÁC NHẬN] Luật Đất đai 2024, Chương VII"
+  - "[CẦN XÁC NHẬN] Nghị định 88/2024/NĐ-CP về bồi thường, hỗ trợ, tái định cư"
+  - "[CẦN XÁC NHẬN] Nghị định 151/2025/NĐ-CP: UBND cấp xã quyết định thu hồi đất, phê duyệt phương án từ 01/7/2025"
+  - "[CẦN XÁC NHẬN] Quyết định 11/2026/QĐ-UBND TP.HCM (06/3/2026): mức thưởng, sàn 60% giá xây mới, suất tái định cư tối thiểu"
+
+people: deceased_owner
+province: Thành phố Hồ Chí Minh
+thu_hoi: tphcm-2026
+persona:
+  age: [25, 70]
+  gender: any
+
+# Giấy tờ đầu ra lập sau ngày nộp và sau ngày QĐ 11/2026 có hiệu lực (06/3/2026).
+submit_date: ["2026-03-01", "2026-05-31"]
+
+documents:
+  - {doc_type: can-cuoc, from: giai-toa-den-bu, required: true}
+  - {doc_type: giay-chung-tu, from: giai-toa-den-bu, required: true}
+  - {doc_type: giay-chung-nhan-nha-dat, from: giai-toa-den-bu, required: true}
+  - {doc_type: ban-ve-hien-trang, from: giai-toa-den-bu, required: true}
+  - {doc_type: to-dang-ky-nha-dat, from: giai-toa-den-bu, required: true}
+  - {doc_type: so-ho-khau, from: giai-toa-den-bu, required: true}
+  - {doc_type: giay-sang-dat, from: giai-toa-den-bu, required: true}
+  - {doc_type: gxn-1131, required: true}
+  - {doc_type: bt-dat, required: true}
+  - {doc_type: bt-cong-trinh, required: true}
+  # Không có vì không đủ điều kiện: hồ sơ vẫn hợp lệ, không ghi vào missing_documents.
+  - {doc_type: tai-dinh-cu, required: false, when: thu_hoi.tdc.du_dieu_kien}
+  - {doc_type: khen-thuong, required: false, when: thu_hoi.co_khen_thuong}
+
+# Ba chiều mới đứng trước để đổi nhanh nhất: với số lượng nhỏ vẫn đủ các tình huống bồi thường.
+# Phủ hết mọi tổ hợp cần 16 x 108 = 1.728 hồ sơ.
+#   thu_hoi.pham_vi   thu hồi toàn bộ / một phần thửa đất
+#   thu_hoi.ban_giao  bàn giao mặt bằng đúng hạn (có quyết định khen thưởng) / trễ hạn (không có)
+#   thu_hoi.tdc       hình thức tái định cư; khong = không đủ điều kiện (không có quyết định tái định cư)
+coverage:
+  - name: pham_vi
+    knob: thu_hoi.pham_vi
+    values:
+      toan-bo: {}
+      mot-phan: {}
+  - name: ban_giao
+    knob: thu_hoi.ban_giao
+    values:
+      dung-han: {}
+      tre-han: {}
+  - name: tdc
+    knob: thu_hoi.tdc
+    values:
+      can-ho: {tai-dinh-cu: can-ho}
+      nen-dat: {tai-dinh-cu: nen-dat}
+      tu-lo-cho-o: {tai-dinh-cu: tu-lo-cho-o}
+      khong: {}
+  - name: nguon_goc
+    knob: people.nguon_goc
+    values:
+      truoc-18-12-1980: {}
+      1980-15-10-1993: {}
+      tu-15-10-1993: {}
+  - name: the
+    knob: persona.card
+    values:
+      cccd-ma-vach: {can-cuoc: cccd-ma-vach}
+      cccd-chip: {can-cuoc: cccd-chip}
+      the-can-cuoc: {can-cuoc: the-can-cuoc}
+  - name: nam_mat
+    knob: people.nam_mat
+    values:
+      truoc-2016: {giay-chung-tu: giay-chung-tu, so-ho-khau: da-xoa-ten}
+      2016-2022: {giay-chung-tu: trich-luc-khai-tu, so-ho-khau: da-xoa-ten}
+      tu-2023: {giay-chung-tu: trich-luc-khai-tu, so-ho-khau: chua-xoa-ten}
+  - name: gcn
+    knob: variant
+    values:
+      danh-may: {giay-chung-nhan-nha-dat: danh-may}
+      viet-tay: {giay-chung-nhan-nha-dat: viet-tay}
+  - name: to_dang_ky
+    knob: variant
+    values:
+      danh-may: {to-dang-ky-nha-dat: danh-may}
+      viet-tay: {to-dang-ky-nha-dat: viet-tay}
+
+rules:
+  - id: R02
+    text: Thông tin người đứng tên nhà đất (đã mất) phải khớp giữa các giấy tờ
+  - id: R03
+    text: Thông tin thửa đất (số thửa, địa chỉ, diện tích) trên giấy chứng nhận và bản vẽ hiện trạng phải khớp nhau
+  - id: R04
+    text: Giấy tờ tùy thân của người đại diện nhận bồi thường phải còn giá trị
+  - id: R05
+    text: Người đứng tên nhà đất phải mất trước ngày nộp hồ sơ
+  - id: R06
+    text: Người đại diện nhận bồi thường phải từ đủ 18 tuổi, nếu không phải có người giám hộ
+  - id: R07
+    text: GXN 1131 phải khớp giấy sang đất, giấy chứng nhận, bản vẽ hiện trạng về thời điểm sử dụng đất và thửa đất
+  - id: R08
+    text: Giấy tờ bồi thường phải ghi đúng chủ sử dụng (người đứng tên đã mất) và người đại diện nhận tiền
+  - id: R09
+    text: Diện tích tính bồi thường không vượt diện tích thu hồi
+  - id: R10
+    text: Số tiền trên bảng chiết tính phải đúng công thức (thành tiền từng dòng, tổng cộng, số tiền bằng chữ)
+  - id: R11
+    text: Chỉ thưởng khi bàn giao mặt bằng đúng hạn, mức thưởng không vượt trần (50 triệu thu hồi toàn bộ, 25 triệu một phần)
+  - id: R12
+    text: Số nhân khẩu trên quyết định tái định cư phải khớp sổ hộ khẩu
+  - id: R13
+    text: "Thứ tự ngày: GXN 1131, quyết định thu hồi và bảng chiết tính, bàn giao mặt bằng, quyết định khen thưởng"
+
+mix:
+  valid: 0.5
+  invalid: 0.5
+
+# needs: ca lỗi cần một tình huống (ví dụ có quyết định khen thưởng); chỉ chọn khi kịch bản biến thể cho phép.
+mutations:
+  # --- Giấy tờ đầu vào (như giai-toa-den-bu) ---
+  - {id: M02, kind: field_conflict, weight: 2, params: {doc_type: giay-chung-tu, field: ho_ten, perturb: typo_name},
+     expect: {decision: request_supplement, rule: R02}}
+  - {id: M03, kind: field_conflict, weight: 1, params: {doc_type: so-ho-khau, field: tv1_ngay_sinh, perturb: year_shift},
+     expect: {decision: request_supplement, rule: R02}}
+  - {id: M04, kind: field_conflict, weight: 2, params: {doc_type: ban-ve-hien-trang, field: dien_tich, perturb: area_shift},
+     expect: {decision: request_supplement, rule: R03}}
+  - {id: M05, kind: persona_override, weight: 1, params: {card: cmnd-9, age: [35, 70]},
+     expect: {decision: request_supplement, rule: R04}}
+  - {id: M06, kind: date_order, weight: 1, params: {doc_type: giay-chung-tu, field: ngay_mat, after: dossier.submit_date},
+     expect: {decision: request_supplement, rule: R05}}
+  - {id: M07, kind: persona_override, weight: 1, params: {age: [15, 17]},
+     expect: {decision: request_supplement, rule: R06}}
+  - {id: M08, kind: field_conflict, weight: 1, params: {doc_type: ban-ve-hien-trang, field: so_thua, perturb: swap_digits},
+     expect: {decision: request_supplement, rule: R03}}
+  - {id: M09, kind: field_conflict, weight: 1, params: {doc_type: ban-ve-hien-trang, field: dia_chi, perturb: other_address},
+     expect: {decision: request_supplement, rule: R03}}
+
+  # --- Giấy tờ bồi thường ---
+  - id: M10
+    kind: field_conflict          # Thời điểm sử dụng đất trên GXN lệch giấy sang đất 1-3 năm
+    weight: 1
+    params: {doc_type: gxn-1131, field: thoi_diem_su_dung, perturb: year_shift}
+    expect: {decision: request_supplement, rule: R07}
+  - id: M11
+    kind: field_conflict          # Tên chủ sử dụng trên bảng chiết tính đất sai chính tả
+    weight: 1
+    params: {doc_type: bt-dat, field: chu_su_dung, perturb: typo_name}
+    expect: {decision: request_supplement, rule: R08}
+  - id: M12
+    kind: field_conflict          # Tổng cộng bằng số đảo chữ số; bằng chữ vẫn đúng
+    weight: 1
+    params: {doc_type: bt-dat, field: tong_cong, perturb: money_swap}
+    expect: {decision: request_supplement, rule: R10}
+  - id: M13
+    kind: field_conflict          # Số tiền bằng chữ lệch bằng số
+    weight: 1
+    params: {doc_type: bt-dat, field: tong_bang_chu, perturb: money_shift}
+    expect: {decision: request_supplement, rule: R10}
+  - id: M14
+    kind: field_conflict          # Diện tích tính bồi thường lớn hơn diện tích thu hồi
+    weight: 1
+    params: {doc_type: bt-dat, field: d1_dien_tich, perturb: area_up}
+    expect: {decision: request_supplement, rule: R09}
+  - id: M15
+    kind: calc_error              # Thành tiền nhà chính quên bổ sung lên 60% giá xây mới, hoặc tính lệch
+    weight: 1
+    params: {doc_type: bt-cong-trinh, row: ct1}
+    expect: {decision: request_supplement, rule: R10}
+  - id: M16
+    kind: field_value             # Thưởng vượt mức trần (bằng chữ đổi theo)
+    weight: 1
+    needs: {thu_hoi.ban_giao: [dung-han]}
+    params: {doc_type: khen-thuong, field: so_tien, values: [60000000, 75000000, 100000000], mirror: [so_tien_bang_chu]}
+    expect: {decision: request_supplement, rule: R11}
+  - id: M17
+    kind: thu_hoi_override        # Có quyết định khen thưởng dù bàn giao trễ hạn
+    weight: 1
+    needs: {thu_hoi.ban_giao: [tre-han]}
+    params: {khen_thuong_khi_tre: true}
+    expect: {decision: request_supplement, rule: R11}
+  - id: M18
+    kind: field_conflict          # Số nhân khẩu trên quyết định tái định cư lệch sổ hộ khẩu
+    weight: 1
+    needs: {thu_hoi.tdc: [can-ho, nen-dat, tu-lo-cho-o]}
+    params: {doc_type: tai-dinh-cu, field: so_nhan_khau, perturb: int_shift}
+    expect: {decision: request_supplement, rule: R12}
+  - id: M19
+    kind: date_order              # Bảng chiết tính đất lập trước ngày GXN
+    weight: 1
+    params: {doc_type: bt-dat, field: ngay_lap, before: thu_hoi.ngay_gxn}
+    expect: {decision: request_supplement, rule: R13}

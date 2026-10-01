@@ -1,6 +1,6 @@
 """Gây lỗi có chủ đích trên hồ sơ hợp lệ. Mỗi hàm trả về mô tả lý do để ghi vào ground truth.
 
-`persona_override` không nằm ở đây: nó áp dụng lúc dựng persona (dossier.build).
+`persona_override`, `thu_hoi_override` không nằm ở đây: chúng áp dụng lúc dựng hồ sơ (dossier.build).
 """
 
 import random
@@ -50,6 +50,19 @@ def _perturb(rng: random.Random, kind: str, value):
             return round(value * (1 + rng.choice([1, -1]) * rng.uniform(0.01, 0.08)), 1)
         case "year_shift":
             return dates.add_years(value, rng.choice([1, -1]) * rng.randint(1, 3))
+        case "money_swap":
+            # Đảo hai chữ số liền nhau của số tiền: lỗi gõ thường gặp trên bảng chiết tính.
+            digits = str(value)
+            pairs = [i for i in range(len(digits) - 1) if digits[i] != digits[i + 1]]
+            i = rng.choice(pairs)
+            return int(digits[:i] + digits[i + 1] + digits[i] + digits[i + 2:])
+        case "money_shift":
+            # Lệch một bậc hàng triệu hoặc chục triệu: số bằng chữ đọc sai so với bằng số.
+            return value + rng.choice([1, -1]) * rng.choice([1, 2, 10, 20]) * 1_000_000
+        case "area_up":
+            return round(value * rng.uniform(1.05, 1.25), 1)
+        case "int_shift":
+            return value + rng.choice([1, -1]) if value > 1 else value + 1
         case "other_address":
             new = value
             while new == value:
@@ -79,16 +92,35 @@ def field_value(rng, dossier, proc, m):
     doc = _find_doc(dossier, p["doc_type"])
     value = rng.choice(p["values"])
     change = _set_field(doc, proc.schemas[p["doc_type"]], p["field"], value, m["id"])
+    # mirror: trường ghi cùng giá trị ở dạng khác (số tiền bằng chữ) đổi theo, để chỉ còn một lỗi cần phát hiện.
+    for name in p.get("mirror", []):
+        _set_field(doc, proc.schemas[p["doc_type"]], name, value, m["id"])
     return f"{proc.schemas[p['doc_type']].title}: {p['field']} = '{change['new']}'"
 
 
 def date_order(rng, dossier, proc, m):
     p = m["params"]
     doc = _find_doc(dossier, p["doc_type"])
-    anchor = dates.parse(resolve_path(p["after"], dossier_ctx(dossier)))
-    value = anchor + timedelta(days=rng.randint(1, 30))
+    # after: ngày bị đẩy ra sau mốc; before: kéo về trước mốc.
+    key = "after" if "after" in p else "before"
+    anchor = dates.parse(resolve_path(p[key], dossier_ctx(dossier)))
+    sign = 1 if key == "after" else -1
+    value = anchor + sign * timedelta(days=rng.randint(1, 30))
     change = _set_field(doc, proc.schemas[p["doc_type"]], p["field"], value, m["id"])
-    return f"{proc.schemas[p['doc_type']].title}: {p['field']} ({change['new']}) sau {p['after']}"
+    return f"{proc.schemas[p['doc_type']].title}: {p['field']} ({change['new']}) {'sau' if sign > 0 else 'trước'} {p[key]}"
+
+
+def calc_error(rng, dossier, proc, m):
+    """Thành tiền một dòng tính sai: quên bổ sung lên 60% giá xây mới (nếu dòng có bổ sung), không thì lệch 5-15%."""
+    p = m["params"]
+    doc = _find_doc(dossier, p["doc_type"])
+    f = doc["fields"]
+    row = p["row"]
+    extra = f[f"{row}_bo_sung"]["value"]
+    value = f[f"{row}_gia_tri_hien_co"]["value"] if extra else round(f[f"{row}_thanh_tien"]["value"] * rng.uniform(0.85, 0.95))
+    change = _set_field(doc, proc.schemas[p["doc_type"]], f"{row}_thanh_tien", value, m["id"])
+    return (f"{proc.schemas[p['doc_type']].title}: thành tiền dòng {row} ghi '{change['new']}', "
+            f"đúng phải là '{change['old']}'")
 
 
 MUTATORS = {
@@ -96,6 +128,7 @@ MUTATORS = {
     "field_conflict": field_conflict,
     "field_value": field_value,
     "date_order": date_order,
+    "calc_error": calc_error,
 }
 
 

@@ -4,7 +4,7 @@
 Khai báo trong schema.yaml, mục `render`:
 
     render:
-      page: a4            # a4 | card | so (sổ hộ khẩu)
+      page: a4            # a4 | a4l (A4 ngang, bảng chiết tính) | card | so (sổ hộ khẩu)
       paper: aged         # white | aged | ruled (giấy kẻ dòng)
       age: [0.3, 0.9]     # mức cũ: 0 = mới, 1 = rất cũ (ố vàng, mực phai)
       print_font: serif   # serif | typewriter | sans
@@ -15,7 +15,7 @@ import random
 
 from generator import RESOURCES_DIR
 
-PAGES = {"a4": (210, 297), "card": (85.6, 53.98), "so": (125, 180)}
+PAGES = {"a4": (210, 297), "a4l": (297, 210), "card": (85.6, 53.98), "so": (125, 180)}
 PRINT_FONTS = {
     "serif": ("Tinos", "Tinos-Regular.ttf", "Tinos-Bold.ttf"),
     "typewriter": ("Cousine", "Cousine-Regular.ttf", "Cousine-Bold.ttf"),
