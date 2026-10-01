@@ -1,0 +1,77 @@
+<section class="procedure" [attr.aria-labelledby]="titleId()">
+  <header class="procedure__header">
+    <div class="procedure__eyebrow">
+      <app-icon name="stamp" [size]="16" />
+      <span>Thủ tục hành chính</span>
+    </div>
+    @if (procedure().code) {
+      <span class="procedure__code">Mã {{ procedure().code }}</span>
+    }
+  </header>
+
+  <div class="procedure__content">
+    <h3 class="procedure__title" [id]="titleId()">{{ procedure().name }}</h3>
+    <p class="procedure__field">Lĩnh vực: {{ procedure().field }}</p>
+
+    <dl class="procedure__facts">
+      <div class="fact">
+        <dt><app-icon name="clock" [size]="16" /> Thời gian giải quyết</dt>
+        <dd>{{ procedure().processingTime }}</dd>
+      </div>
+      <div class="fact">
+        <dt><app-icon name="users" [size]="16" /> Đối tượng</dt>
+        <dd>{{ procedure().applicant }}</dd>
+      </div>
+      <div class="fact">
+        <dt><app-icon name="monitor" [size]="16" /> Mức độ</dt>
+        <dd>
+          <span class="level" [class.level--full]="procedure().serviceLevel === 'full-online'">{{ serviceLevel() }}</span>
+        </dd>
+      </div>
+      <div class="fact">
+        <dt><app-icon name="wallet" [size]="16" /> Lệ phí</dt>
+        <dd>{{ procedure().fee }}</dd>
+      </div>
+      <div class="fact fact--wide">
+        <dt><app-icon name="building" [size]="16" /> Cơ quan thực hiện</dt>
+        <dd>{{ procedure().authority }}</dd>
+      </div>
+    </dl>
+
+    @if (expanded()) {
+      <div class="procedure__details" [id]="detailsId()">
+        <div>
+          <h4>Thành phần hồ sơ</h4>
+          <ul>
+            @for (doc of procedure().requiredDocuments; track doc) {
+              <li>{{ doc }}</li>
+            }
+          </ul>
+        </div>
+        <div>
+          <h4>Căn cứ pháp lý</h4>
+          <ul>
+            @for (law of procedure().legalBasis; track law) {
+              <li>{{ law }}</li>
+            }
+          </ul>
+        </div>
+      </div>
+    }
+  </div>
+
+  <footer class="procedure__actions">
+    <button type="button" class="btn btn--outline" [attr.aria-expanded]="expanded()"
+            [attr.aria-controls]="detailsId()" (click)="toggle()">
+      {{ expanded() ? 'Thu gọn' : 'Xem chi tiết' }}
+      <app-icon name="chevron-down" [size]="16" class="chevron" [class.rotated]="expanded()" />
+    </button>
+    @if (procedure().submitUrl) {
+      <a class="btn btn--primary" [href]="procedure().submitUrl" target="_blank" rel="noopener noreferrer">
+        Thực hiện trực tuyến
+        <app-icon name="arrow-right" [size]="16" />
+        <span class="visually-hidden">(mở Cổng Dịch vụ công trong thẻ mới)</span>
+      </a>
+    }
+  </footer>
+</section>

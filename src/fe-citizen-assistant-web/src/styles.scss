@@ -1,0 +1,162 @@
+@use '@angular/material' as mat;
+@use 'app/shared/styles/tokens' as t;
+@use 'app/shared/styles/buttons';
+
+:root {
+  // Brand
+  --color-primary: #c62828;
+  --color-primary-hover: #a91f1f;
+  --color-primary-50: #fdf3f2;
+  --color-primary-100: #f9e1df;
+  --color-navy: #12304a;
+  --color-navy-hover: #0c2338;
+  --color-navy-700: #1d4466;
+  --color-navy-50: #eef3f8;
+  --color-navy-100: #dbe6f0;
+  --color-gold: #c9a227;
+  --color-gold-soft: #f6eccb;
+
+  // Neutrals
+  --color-bg: #f6f8fa;
+  --color-surface: #ffffff;
+  --color-surface-sunken: #f1f4f7;
+  --color-text: #17212b;
+  --color-text-muted: #5d6676; // darker than #667085 for AA on #f6f8fa
+  --color-text-subtle: #8a93a3;
+  --color-border: #e4e7ec;
+  --color-border-strong: #cfd5de;
+  --color-focus: #1f6fb2;
+
+  // Status
+  --color-success: #1b7f4b;
+  --color-success-50: #ecf8f1;
+  --color-warning: #9a6200;
+  --color-warning-50: #fff7e6;
+  --color-warning-border: #f2d394;
+  --color-info: #1f6fb2;
+  --color-info-50: #edf5fc;
+
+  // Shape and depth
+  --radius-xs: 3px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 10px;
+  --shadow-xs: 0 1px 1px rgb(16 24 40 / 0.04);
+  --shadow-sm: 0 1px 2px rgb(16 24 40 / 0.06);
+  --shadow-md: 0 2px 8px rgb(16 24 40 / 0.08);
+  --shadow-lg: 0 8px 24px rgb(16 24 40 / 0.16);
+
+  // Motion
+  --duration-fast: 150ms;
+  --duration-base: 240ms;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+
+  // Layout
+  --header-height: 68px;
+  --sidebar-width: 288px;
+  --sidebar-collapsed-width: 72px;
+  --content-max: 860px;
+
+  --font-sans: 'Be Vietnam Pro', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  @include t.mobile {
+    --header-height: 58px;
+  }
+
+  @include mat.theme((
+    color: (primary: mat.$red-palette, tertiary: mat.$azure-palette, theme-type: light),
+    typography: 'Be Vietnam Pro',
+    density: 0,
+  ));
+  @include mat.menu-overrides((
+    container-shape: 6px,
+    container-color: #ffffff,
+    item-label-text-size: 14px,
+  ));
+  @include mat.tooltip-overrides((
+    container-color: #12304a,
+    supporting-text-color: #ffffff,
+    supporting-text-size: 12px,
+  ));
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow: hidden;
+}
+
+h1, h2, h3, h4, p { margin: 0; }
+
+a { color: var(--color-info); }
+
+::selection { background: var(--color-primary-100); }
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: 1000;
+  padding: 10px 16px;
+  border-radius: var(--radius-sm);
+  background: var(--color-navy);
+  color: #fff;
+  font-weight: 600;
+  transform: translateY(-150%);
+  transition: transform var(--duration-fast) ease;
+
+  &:focus { transform: none; }
+}
+
+// Thin, quiet scrollbars
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #c7ced8 transparent;
+}
+
+.mat-mdc-menu-panel.account-menu {
+  min-width: 240px;
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-md);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

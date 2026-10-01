@@ -1,0 +1,87 @@
+<header class="header">
+  <div class="header__inner">
+    <button type="button" class="header__icon-btn header__menu" aria-label="Mở danh sách cuộc trò chuyện"
+            (click)="menuToggle.emit()">
+      <app-icon name="menu" [size]="22" />
+    </button>
+
+    <a class="brand" href="/" [attr.aria-label]="organization().name + ', ' + organization().parent + ' - Trang chủ'">
+      <app-org-logo [initials]="organization().initials" [size]="40" class="brand__logo" />
+      <span class="brand__text">
+        <span class="brand__parent">{{ organization().parent }}</span>
+        <span class="brand__name">{{ organization().name }}</span>
+      </span>
+    </a>
+
+    <nav class="nav" aria-label="Điều hướng chính">
+      <ul>
+        @for (link of navLinks(); track link.label) {
+          <li>
+            <a [href]="link.href" class="nav__link" [class.nav__link--active]="link.active"
+               [attr.aria-current]="link.active ? 'page' : null">{{ link.label }}</a>
+          </li>
+        }
+      </ul>
+    </nav>
+
+    <div class="header__end">
+      <span class="status" [class]="'status status--' + status()" role="status">
+        <span class="status__dot" aria-hidden="true"></span>
+        <span class="status__label">{{ statusLabel() }}</span>
+      </span>
+
+      <button type="button" class="header__icon-btn header__nav-more" aria-label="Danh mục"
+              [matMenuTriggerFor]="navMenu">
+        <app-icon name="more" [size]="22" />
+      </button>
+
+      <button type="button" class="header__icon-btn header__bell" aria-label="Thông báo, có 1 thông báo mới"
+              matTooltip="Thông báo">
+        <app-icon name="bell" [size]="20" />
+        <span class="header__bell-dot" aria-hidden="true"></span>
+      </button>
+
+      <button type="button" class="account" [matMenuTriggerFor]="accountMenu"
+              [attr.aria-label]="'Tài khoản: ' + user().fullName">
+        <span class="account__avatar" aria-hidden="true">{{ initials() }}</span>
+        <span class="account__text">
+          <span class="account__name">{{ user().fullName }}</span>
+          <span class="account__meta">{{ user().identityLevel }}</span>
+        </span>
+        <app-icon name="chevron-down" [size]="16" class="account__chevron" />
+      </button>
+    </div>
+  </div>
+</header>
+
+<mat-menu #navMenu="matMenu" xPosition="before" class="account-menu">
+  @for (link of navLinks(); track link.label) {
+    <a mat-menu-item [href]="link.href">
+      <app-icon [name]="link.icon" [size]="18" class="menu-icon" />
+      <span>{{ link.label }}</span>
+    </a>
+  }
+</mat-menu>
+
+<mat-menu #accountMenu="matMenu" xPosition="before" class="account-menu">
+  <div class="menu-profile" aria-hidden="true">
+    <strong>{{ user().fullName }}</strong>
+    <span>{{ user().identityLevel }}</span>
+  </div>
+  <button mat-menu-item type="button">
+    <app-icon name="user" [size]="18" class="menu-icon" />
+    <span>Thông tin cá nhân</span>
+  </button>
+  <button mat-menu-item type="button">
+    <app-icon name="folder" [size]="18" class="menu-icon" />
+    <span>Hồ sơ của tôi</span>
+  </button>
+  <button mat-menu-item type="button">
+    <app-icon name="settings" [size]="18" class="menu-icon" />
+    <span>Cài đặt tài khoản</span>
+  </button>
+  <button mat-menu-item type="button" class="menu-logout">
+    <app-icon name="logout" [size]="18" class="menu-icon" />
+    <span>Đăng xuất</span>
+  </button>
+</mat-menu>

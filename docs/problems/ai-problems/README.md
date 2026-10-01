@@ -1,5 +1,7 @@
 # Bài toán AI của luồng xử lý hồ sơ
 
+> Người mới: đọc [Giải thích cho người mới](00-overview.md) trước.
+
 Các bài toán AI cần giải trong luồng xử lý hồ sơ, chia hai tầng:
 
 - **Nhóm** `AIG-NN`: một năng lực AI cần có để hoàn thành luồng.
@@ -23,7 +25,7 @@ flowchart LR
     G8 --> H[Cán bộ duyệt]
 ```
 
-Các nhóm áp dụng cho mọi bước (không vẽ trong sơ đồ): AIG-09 đánh giá chất lượng, AIG-10 an toàn và bảo mật, AIG-11 học từ phản hồi, AIG-12 vận hành model, AIG-13 toàn vẹn giấy tờ.
+Các nhóm áp dụng cho mọi bước (không vẽ trong sơ đồ): AIG-09 đánh giá chất lượng, AIG-10 an toàn và bảo mật, AIG-11 học từ phản hồi, AIG-12 vận hành model.
 
 ## 2. Mức ưu tiên
 
@@ -35,7 +37,7 @@ Mỗi `AIP` có `priority` theo MoSCoW. Nhóm `AIG` không có mức riêng: nh�
 |---|---|---|
 | `Must` | Bắt buộc trước khi chạy thật. Làm trước | 23 |
 | `Should` | Làm sau `Must`, hoặc khi số liệu cho thấy cần | 11 |
-| `Could` | Chỉ làm khi còn nguồn lực | 3 |
+| `Could` | Chỉ làm khi còn nguồn lực | 2 |
 
 Bài toán là `Must` khi thỏa ít nhất một tiêu chí: **A1** thiếu thì luồng không chạy được; **A2** thiếu thì có thể quyết định sai mà không ai phát hiện; **A3** ràng buộc pháp lý hoặc bảo mật; **A4** cần để đo các bài toán `Must` khác.
 
@@ -117,7 +119,6 @@ Mọi bài toán hiện ở trạng thái `Draft`, giai đoạn `Defined`. Sớm
 | [AIG-12 Vận hành model](AIG-12-model-operations.md) | [AIP-034](AIP-034-data-privacy-hosting.md) | Model nội bộ hay API ngoài, bảo vệ dữ liệu cá nhân | Rủi ro | Must | |
 | | [AIP-035](AIP-035-model-serving-cost-latency.md) | Phân tầng model, tối ưu chi phí và độ trễ | Hỗ trợ | Should | |
 | | [AIP-036](AIP-036-drift-detection.md) | Drift detection | Hỗ trợ | Could | |
-| [AIG-13 Toàn vẹn giấy tờ](AIG-13-document-integrity.md) | [AIP-037](AIP-037-tampering-detection.md) | Phát hiện giả mạo, chỉnh sửa ảnh | Rủi ro | Could | |
 
 ## 4. Giai đoạn nghiên cứu
 

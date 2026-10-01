@@ -24,14 +24,14 @@ Từ ảnh một trang giấy tờ, tách trang thành các vùng (nội dung ch
 **Phạm vi:**
 
 - Gồm: phân tích bố cục; OCR chữ in, chữ đánh máy, chữ viết tay; điểm tin cậy thô cho từng từ.
-- Không gồm: hiệu chỉnh điểm tin cậy (AIP-002), kiểm tra chất lượng ảnh (AIP-003), phát hiện giả mạo (AIP-037), sửa lỗi OCR bằng ngữ cảnh (AIP-005).
+- Không gồm: hiệu chỉnh điểm tin cậy (AIP-002), kiểm tra chất lượng ảnh (AIP-003), sửa lỗi OCR bằng ngữ cảnh (AIP-005).
 
 ### 1.2. Vị trí trong luồng
 
 **Bước:** Đọc ảnh (nhóm [AIG-01](AIG-01-document-vision-ocr.md) - Đọc ảnh và OCR). Sơ đồ luồng xem [README](README.md).
 
 - Dựa vào: [AIP-003](AIP-003-image-quality-check.md) - Đánh giá chất lượng ảnh
-- Được dùng bởi: [AIP-002](AIP-002-ocr-confidence-calibration.md) - Hiệu chỉnh độ tin cậy theo từng trường; [AIP-004](AIP-004-document-classification-splitting.md) - Phân loại và tách giấy tờ; [AIP-005](AIP-005-schema-extraction.md) - Trích xuất theo schema và sửa lỗi OCR; [AIP-006](AIP-006-extraction-grounding.md) - Grounding và chống bịa khi trích xuất; [AIP-030](AIP-030-bias-fairness.md) - Bias và fairness; [AIP-037](AIP-037-tampering-detection.md) - Phát hiện giả mạo, chỉnh sửa ảnh
+- Được dùng bởi: [AIP-002](AIP-002-ocr-confidence-calibration.md) - Hiệu chỉnh độ tin cậy theo từng trường; [AIP-004](AIP-004-document-classification-splitting.md) - Phân loại và tách giấy tờ; [AIP-005](AIP-005-schema-extraction.md) - Trích xuất theo schema và sửa lỗi OCR; [AIP-006](AIP-006-extraction-grounding.md) - Grounding và chống bịa khi trích xuất; [AIP-030](AIP-030-bias-fairness.md) - Bias và fairness
 
 ### 1.3. Đầu vào và đầu ra
 
@@ -125,7 +125,6 @@ Quy tắc ghi: `standards/07-references.md`.
 | `AIP-005` | [Trích xuất theo schema và sửa lỗi OCR](AIP-005-schema-extraction.md) | Được dùng bởi | Trích xuất trên text OCR |
 | `AIP-006` | [Grounding và chống bịa khi trích xuất](AIP-006-extraction-grounding.md) | Được dùng bởi | Dùng bounding box của vùng làm vị trí nguồn |
 | `AIP-030` | [Bias và fairness](AIP-030-bias-fairness.md) | Được dùng bởi | Đo chênh lệch chất lượng OCR theo nhóm người |
-| `AIP-037` | [Phát hiện giả mạo, chỉnh sửa ảnh](AIP-037-tampering-detection.md) | Được dùng bởi | Dùng vùng dấu mộc, chữ ký đã tách |
 
 ## 7. Lịch sử thay đổi
 
@@ -135,3 +134,4 @@ Quy tắc ghi: `standards/07-references.md`.
 | 2026-09-29 | binhnguyenSoftz | Tổ chức lại: gộp AIP-001 cũ (OCR viết tay) và AIP-002 cũ (phân tích bố cục); nhóm `AIG-01`; viết lại phát biểu bài toán | Có |
 | 2026-09-29 | binhnguyenSoftz | Thêm thách thức trang nhiều cột, khung; chỉ số tỉ lệ trường bị lẫn giữa các cột, khung; thử nghiệm so sánh OCR cả trang với tách vùng | Không cần |
 | 2026-09-29 | binhnguyenSoftz | Đổi tên chỉ số "phát hiện vùng theo loại" thành "phân tích bố cục (tách vùng theo loại)" | Không cần |
+| 2026-09-30 | binhnguyenSoftz | Bỏ bài toán phát hiện giả mạo (AIP-037, AIG-13): xóa tham chiếu tới AIP-037 ở mục 1.1, 1.2, 6 | Có |

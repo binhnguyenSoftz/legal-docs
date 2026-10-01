@@ -45,10 +45,9 @@ Mỗi bài toán con là một file `AIP` riêng, có mức ưu tiên, giai đo�
 | [AIP-002](AIP-002-ocr-confidence-calibration.md) | Hiệu chỉnh độ tin cậy theo từng trường | Bài toán | Must | Có |
 | [AIP-003](AIP-003-image-quality-check.md) | Đánh giá chất lượng ảnh | Bài toán | Should |  |
 
-> Lưu ý: Phát hiện giả mạo ([AIP-037](AIP-037-tampering-detection.md)) thuộc [AIG-13](AIG-13-document-integrity.md) vì là vấn đề toàn vẹn, không phải đọc chữ.
-
 ## 5. Lịch sử thay đổi
 
 | Ngày | Người sửa | Nội dung | Đã rà tham chiếu |
 |---|---|---|---|
 | 2026-09-29 | binhnguyenSoftz | Tạo mới khi tổ chức lại bài toán AI thành 13 nhóm | Không cần |
+| 2026-09-30 | binhnguyenSoftz | Bỏ bài toán phát hiện giả mạo (AIP-037, AIG-13): xóa lưu ý trỏ tới AIP-037 | Có |

@@ -1,0 +1,93 @@
+<form class="composer" [class.composer--focused]="focused()" [class.composer--listening]="voice.listening()"
+      (submit)="$event.preventDefault(); submit()">
+  @if (attachments().length) {
+    <ul class="attachments" aria-label="Tệp đã chọn">
+      @for (file of attachments(); track file.id) {
+        <li class="attachment">
+          <span class="attachment__icon">
+            <app-icon [name]="file.kind === 'document' ? 'file' : 'paperclip'" [size]="16" />
+          </span>
+          <span class="attachment__text">
+            <span class="attachment__name">{{ file.name }}</span>
+            <span class="attachment__size">{{ size(file.size) }}</span>
+          </span>
+          <button type="button" class="attachment__remove" [attr.aria-label]="'Bỏ tệp ' + file.name"
+                  (click)="removeAttachment(file.id)">
+            <app-icon name="close" [size]="14" />
+          </button>
+        </li>
+      }
+    </ul>
+  }
+
+  <label class="visually-hidden" for="chat-question">Câu hỏi của bạn</label>
+  <textarea #textarea id="chat-question" class="composer__field" rows="1" [maxLength]="maxLength"
+            placeholder="Nhập câu hỏi về bồi thường, hỗ trợ, tái định cư khi thu hồi đất..."
+            [value]="text()" (input)="onInput(textarea.value)" (keydown)="onKeydown($event)"
+            (focus)="focused.set(true)" (blur)="focused.set(false)"
+            aria-describedby="chat-disclaimer"></textarea>
+
+  <div class="composer__bar">
+    <div class="composer__tools">
+      <input #fileInput type="file" multiple hidden (change)="onFiles(fileInput, 'file')" />
+      <button type="button" class="tool" aria-label="Đính kèm tệp" matTooltip="Đính kèm tệp"
+              (click)="fileInput.click()">
+        <app-icon name="paperclip" [size]="19" />
+      </button>
+
+      <input #docInput type="file" multiple hidden accept=".pdf,.doc,.docx,image/*"
+             (change)="onFiles(docInput, 'document')" />
+      <button type="button" class="tool tool--labeled" matTooltip="Tải lên giấy tờ (PDF, Word, ảnh chụp)"
+              (click)="docInput.click()">
+        <app-icon name="upload" [size]="18" />
+        <span>Tải lên giấy tờ</span>
+      </button>
+    </div>
+
+    <div class="composer__send">
+      @if (nearLimit()) {
+        <span class="counter" aria-live="polite">{{ text().length }}/{{ maxLength }}</span>
+      }
+
+      <button type="button" class="tool tool--voice" [class.tool--active]="voice.listening()"
+              [disabled]="!voice.supported"
+              [attr.aria-label]="voice.listening() ? 'Dừng nhập bằng giọng nói' : 'Nhập bằng giọng nói'"
+              [attr.aria-pressed]="voice.listening()"
+              [matTooltip]="voice.supported ? (voice.listening() ? 'Dừng ghi âm' : 'Nhập bằng giọng nói') : 'Trình duyệt chưa hỗ trợ nhập giọng nói'"
+              (click)="toggleVoice()">
+        <app-icon name="mic" [size]="19" />
+      </button>
+
+      @if (busy()) {
+        <button type="button" class="send send--stop" aria-label="Dừng trả lời" matTooltip="Dừng"
+                (click)="stopped.emit()">
+          <app-icon name="stop" [size]="16" [stroke]="2.4" />
+        </button>
+      } @else {
+        <button type="submit" class="send" [disabled]="!canSend()" aria-label="Gửi câu hỏi" matTooltip="Gửi (Enter)">
+          <app-icon name="send" [size]="18" [stroke]="2" />
+        </button>
+      }
+    </div>
+  </div>
+</form>
+
+@if (fileError() || voice.error()) {
+  <p class="message message--error" role="alert">
+    <app-icon name="warning" [size]="14" />
+    {{ fileError() || voice.error() }}
+  </p>
+} @else if (voice.listening()) {
+  <p class="message message--listening" role="status">
+    <span class="rec-dot" aria-hidden="true"></span>
+    Đang nghe... Hãy nói câu hỏi của bạn bằng tiếng Việt.
+  </p>
+}
+
+<p class="disclaimer" id="chat-disclaimer">
+  <app-icon name="info" [size]="14" />
+  <span>
+    Thông tin chỉ mang tính tham khảo.
+    <span class="disclaimer__break">Số tiền chính thức của gia đình là số trong phương án được UBND phường phê duyệt.</span>
+  </span>
+</p>

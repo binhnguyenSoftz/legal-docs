@@ -1,0 +1,31 @@
+@for (group of groups(); track group.label) {
+  <section class="group" [attr.aria-labelledby]="'group-' + $index">
+    <h2 class="group__label" [id]="'group-' + $index">{{ group.label }}</h2>
+    <ul class="group__list">
+      @for (conversation of group.conversations; track conversation.id) {
+        <li class="item" [class.item--active]="conversation.id === activeId()">
+          <button type="button" class="item__main" (click)="select.emit(conversation)"
+                  [attr.aria-current]="conversation.id === activeId() ? 'true' : null">
+            <app-icon name="chat" [size]="16" class="item__icon" />
+            <span class="item__title">{{ conversation.title }}</span>
+          </button>
+          <button type="button" class="item__more" [matMenuTriggerFor]="itemMenu"
+                  [attr.aria-label]="'Tùy chọn cho ' + conversation.title">
+            <app-icon name="more" [size]="16" />
+          </button>
+          <mat-menu #itemMenu="matMenu" xPosition="before" class="account-menu">
+            <button mat-menu-item type="button" (click)="remove.emit(conversation)">
+              <app-icon name="trash" [size]="16" class="menu-icon" />
+              <span>Xóa cuộc trò chuyện</span>
+            </button>
+          </mat-menu>
+        </li>
+      }
+    </ul>
+  </section>
+} @empty {
+  <div class="empty" role="status">
+    <app-icon [name]="searching() ? 'search-x' : 'chat'" [size]="22" />
+    <p>{{ searching() ? 'Không tìm thấy cuộc trò chuyện phù hợp' : 'Chưa có cuộc trò chuyện nào' }}</p>
+  </div>
+}

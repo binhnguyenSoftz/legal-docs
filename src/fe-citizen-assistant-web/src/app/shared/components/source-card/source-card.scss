@@ -1,0 +1,113 @@
+@use 'app/shared/styles/tokens' as t;
+
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.source {
+  padding: 8px 0;
+}
+
+.source__row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  min-width: 0;
+
+  @include t.mobile { flex-wrap: wrap; row-gap: 0; }
+}
+
+.source__index {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  border-radius: 9px;
+  background: var(--color-navy-50);
+  color: var(--color-navy);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.source__body {
+  flex: 1;
+  min-width: 0;
+
+  @include t.mobile { flex-basis: calc(100% - 28px); }
+}
+
+.source__title {
+  display: block;
+  overflow: hidden;
+  color: var(--color-navy);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.45;
+  text-decoration: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  &:hover { text-decoration: underline; text-underline-offset: 2px; }
+  &:focus-visible { @include t.focus-ring; }
+
+  @include t.mobile {
+    display: -webkit-box;
+    white-space: normal;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+}
+
+.source__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 4px;
+  color: var(--color-text-muted);
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+.source__unofficial {
+  color: var(--color-warning);
+  font-weight: 600;
+}
+
+.source__actions {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 12px;
+  margin-top: 1px;
+
+  @include t.mobile {
+    width: 100%;
+    margin: 2px 0 0 28px;
+  }
+}
+
+.source__link {
+  @include t.reset-button;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  color: var(--color-info);
+  font-size: 13px;
+  text-decoration: none;
+  white-space: nowrap;
+
+  &:hover { text-decoration: underline; text-underline-offset: 2px; }
+  &:focus-visible { @include t.focus-ring; }
+}
+
+.source__excerpt {
+  margin: 6px 0 0 28px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-sunken);
+  color: var(--color-text);
+  font-size: 13px;
+  line-height: 1.55;
+}

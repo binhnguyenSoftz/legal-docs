@@ -1,0 +1,20 @@
+<h2 class="visually-hidden">Cuộc trò chuyện: {{ conversation().title }}</h2>
+
+<div class="log" #log role="log" aria-live="polite" aria-relevant="additions" aria-label="Nội dung trò chuyện">
+  @for (message of conversation().messages; track message.id) {
+    <article class="item" data-message>
+      @if (message.role === 'user') {
+        <app-user-message [message]="message" />
+      } @else {
+        <app-assistant-message [message]="asAssistant(message)" [isLatest]="message.id === lastAssistantId() && !thinking()"
+                               [busy]="busy()" (ask)="ask.emit($event)" (retry)="retry.emit($event)"
+                               (feedback)="feedback.emit({ message: asAssistant(message), value: $event })" />
+      }
+    </article>
+  }
+
+  @if (thinking()) {
+    <app-typing-indicator />
+  }
+  <div class="log__end" aria-hidden="true"></div>
+</div>

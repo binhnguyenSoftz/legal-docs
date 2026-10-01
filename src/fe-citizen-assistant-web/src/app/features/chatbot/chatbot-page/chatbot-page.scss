@@ -1,0 +1,112 @@
+@use 'app/shared/styles/tokens' as t;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+.layout {
+  position: relative;
+  display: grid;
+  flex: 1;
+  grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+  min-height: 0;
+  transition: grid-template-columns var(--duration-base) var(--ease-out);
+
+  &--collapsed { grid-template-columns: var(--sidebar-collapsed-width) minmax(0, 1fr); }
+
+  @include t.mobile { grid-template-columns: minmax(0, 1fr); }
+}
+
+.sidebar {
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+
+  @include t.mobile {
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: 50;
+    width: min(320px, 86vw);
+    box-shadow: var(--shadow-lg);
+    transform: translateX(-100%);
+    visibility: hidden;
+    transition: transform var(--duration-base) var(--ease-out), visibility 0s linear var(--duration-base);
+
+    &--open {
+      transform: none;
+      visibility: visible;
+      transition: transform var(--duration-base) var(--ease-out);
+    }
+  }
+}
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  border: 0;
+  background: rgb(15 23 42 / 0.45);
+  cursor: default;
+  animation: fade var(--duration-base) ease;
+}
+
+.main {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  // Subtle lotus-lattice pattern, fading out towards the bottom.
+  background:
+    linear-gradient(to bottom, rgb(246 248 250 / 0) 0, var(--color-bg) 420px),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56' viewBox='0 0 56 56'%3E%3Cg fill='none' stroke='%2312304A' stroke-opacity='0.04' stroke-width='1'%3E%3Cpath d='M28 12c5 6 5 12 0 18-5-6-5-12 0-18z'/%3E%3Cpath d='M16 22c6 1 10 5 11 11-6-1-10-5-11-11zM40 22c-6 1-10 5-11 11 6-1 10-5 11-11z'/%3E%3Cpath d='M0 28h8M48 28h8M28 48v8M28 0v4'/%3E%3C/g%3E%3C/svg%3E"),
+    var(--color-bg);
+}
+
+.scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+  overscroll-behavior: contain;
+}
+
+.composer-dock {
+  position: relative;
+  padding: 8px 24px 14px;
+  background: linear-gradient(to bottom, rgb(246 248 250 / 0), var(--color-bg) 18px);
+
+  @include t.mobile {
+    padding: 6px 10px calc(10px + env(safe-area-inset-bottom));
+  }
+}
+
+.to-bottom {
+  @include t.reset-button;
+  position: absolute;
+  top: -44px;
+  left: 50%;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  background: var(--color-surface);
+  color: var(--color-navy);
+  box-shadow: var(--shadow-md);
+  transform: translateX(-50%);
+  animation: fade var(--duration-base) ease;
+
+  &:hover { background: var(--color-navy-50); }
+  &:focus-visible { @include t.focus-ring; }
+}
+
+@keyframes fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

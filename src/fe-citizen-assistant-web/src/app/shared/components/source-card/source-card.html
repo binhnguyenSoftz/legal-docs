@@ -1,0 +1,45 @@
+<article class="source">
+  <div class="source__row">
+    @if (index()) {
+      <span class="source__index" aria-hidden="true">{{ index() }}</span>
+    }
+
+    <div class="source__body">
+      <a class="source__title" [href]="source().url" target="_blank" rel="noopener noreferrer"
+         [title]="source().title">
+        {{ source().title }}
+        <span class="visually-hidden">(mở trong thẻ mới)</span>
+      </a>
+      <p class="source__meta">
+        @if (!source().official) {
+          <span class="source__unofficial">Nguồn tham khảo ·</span>
+        }
+        @if (source().documentNumber) {
+          <span>{{ source().documentNumber }} ·</span>
+        }
+        <span>{{ source().publisher }}</span>
+        @if (source().updatedAt) {
+          <span>· {{ source().updatedAt | date: 'dd/MM/yyyy' }}</span>
+        }
+      </p>
+    </div>
+
+    <div class="source__actions">
+      @if (source().excerpt) {
+        <button type="button" class="source__link" [attr.aria-expanded]="expanded()"
+                [attr.aria-controls]="excerptId()" (click)="toggle()">
+          {{ expanded() ? 'Ẩn trích dẫn' : 'Trích dẫn' }}
+        </button>
+      }
+      <a class="source__link" [href]="source().url" target="_blank" rel="noopener noreferrer"
+         [attr.aria-label]="actionLabel() + ': ' + source().title">
+        {{ actionLabel() }}
+        <app-icon name="external" [size]="13" />
+      </a>
+    </div>
+  </div>
+
+  @if (expanded() && source().excerpt) {
+    <blockquote class="source__excerpt" [id]="excerptId()">“{{ source().excerpt }}”</blockquote>
+  }
+</article>

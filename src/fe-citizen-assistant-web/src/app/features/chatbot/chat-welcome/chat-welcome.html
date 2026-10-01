@@ -1,0 +1,70 @@
+<section class="welcome" aria-labelledby="welcome-title">
+  <div class="hero">
+    <app-assistant-avatar [size]="48" />
+    <div>
+      <h1 class="hero__title" id="welcome-title">
+        Xin chào{{ userName() ? ' ' + userName() : '' }}, tôi có thể hỗ trợ gì cho bạn?
+      </h1>
+      <p class="hero__lead">
+        Trợ lý AI của {{ organization().name }}, {{ organization().parent }}, giải đáp về bồi thường, hỗ trợ
+        và tái định cư cho các hộ có đất bị thu hồi trên địa bàn phường: hồ sơ cần chuẩn bị, cách tính tiền,
+        tái định cư, chi trả và khiếu nại.
+      </p>
+    </div>
+  </div>
+
+  <h2 class="section-title">Bạn cần hỗ trợ về</h2>
+  <ul class="topics">
+    @for (group of groups(); track group.category) {
+      <li>
+        <button type="button" class="topic" [disabled]="disabled()" (click)="ask.emit(group.question)">
+          <app-icon [name]="group.icon" [size]="24" [stroke]="1.6" class="topic__icon" />
+          <span class="topic__body">
+            <span class="topic__title">{{ group.title }}</span>
+            <span class="topic__question">{{ group.question.text }}</span>
+          </span>
+          <app-icon name="chevron-right" [size]="18" class="topic__arrow" />
+        </button>
+      </li>
+    }
+  </ul>
+
+  @if (popular().length) {
+    <h2 class="section-title">Câu hỏi người dân hay hỏi</h2>
+    <ul class="faq">
+      @for (q of popular(); track q.id) {
+        <li>
+          <button type="button" class="faq__item" [disabled]="disabled()" (click)="ask.emit(q)">
+            {{ q.text }}
+          </button>
+        </li>
+      }
+    </ul>
+  }
+
+  <aside class="contact" aria-labelledby="contact-title">
+    <h2 class="contact__title" id="contact-title">Cần trao đổi trực tiếp về hồ sơ của gia đình?</h2>
+    <dl class="contact__list">
+      <div>
+        <dt>Nơi tiếp dân</dt>
+        <dd>{{ organization().serviceDesk }}</dd>
+      </div>
+      @if (organization().address) {
+        <div>
+          <dt>Địa chỉ</dt>
+          <dd>{{ organization().address }}</dd>
+        </div>
+      }
+      <div>
+        <dt>Giờ tiếp nhận</dt>
+        <dd>{{ organization().workingHours }}</dd>
+      </div>
+      @if (organization().hotline) {
+        <div>
+          <dt>Điện thoại</dt>
+          <dd><a [href]="'tel:' + organization().hotline">{{ organization().hotline }}</a></dd>
+        </div>
+      }
+    </dl>
+  </aside>
+</section>

@@ -24,7 +24,7 @@ Kiểm tra ảnh người dân nộp ngay khi nhận: mờ, lóa, nghiêng, thi�
 **Phạm vi:**
 
 - Gồm: phát hiện lỗi chụp, lỗi scan; lý do cụ thể để người dân sửa.
-- Không gồm: đọc chữ (AIP-001), phát hiện chỉnh sửa ảnh (AIP-037).
+- Không gồm: đọc chữ (AIP-001).
 
 ### 1.2. Vị trí trong luồng
 
@@ -98,3 +98,4 @@ Quy tắc ghi: `standards/07-references.md`.
 |---|---|---|---|
 | 2026-09-28 | <Tên> | Tạo mới, định nghĩa ban đầu từ danh sách bài toán AI của luồng | Không cần |
 | 2026-09-29 | binhnguyenSoftz | Tổ chức lại: đổi mã từ AIP-004 cũ; nhóm `AIG-01`, thêm `kind`; viết lại phát biểu bài toán | Có |
+| 2026-09-30 | binhnguyenSoftz | Bỏ bài toán phát hiện giả mạo (AIP-037, AIG-13): xóa AIP-037 khỏi phạm vi "Không gồm" | Có |

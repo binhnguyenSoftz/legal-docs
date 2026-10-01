@@ -1,0 +1,58 @@
+@use 'tokens' as t;
+
+// Global button styles shared by cards and states.
+.btn {
+  @include t.reset-button;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 0 16px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  text-decoration: none;
+  transition:
+    background-color var(--duration-fast) ease,
+    border-color var(--duration-fast) ease,
+    color var(--duration-fast) ease,
+    box-shadow var(--duration-fast) ease,
+    transform var(--duration-fast) ease;
+
+  &:focus-visible { @include t.focus-ring; }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  &--primary {
+    background: var(--color-primary);
+    color: #fff;
+    &:hover:not(:disabled) { background: var(--color-primary-hover); }
+  }
+
+  &--navy {
+    background: var(--color-navy);
+    color: #fff;
+    &:hover:not(:disabled) { background: var(--color-navy-hover); }
+  }
+
+  &--outline {
+    background: var(--color-surface);
+    color: var(--color-navy);
+    border: 1px solid var(--color-border-strong);
+    &:hover:not(:disabled) { border-color: var(--color-navy); background: var(--color-navy-50); }
+  }
+
+  &--ghost {
+    color: var(--color-navy);
+    padding: 0 10px;
+    &:hover:not(:disabled) { background: var(--color-navy-50); }
+  }
+
+  &--sm {
+    min-height: 32px;
+    padding: 0 12px;
+    font-size: 13px;
+  }
+}

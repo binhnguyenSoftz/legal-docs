@@ -8,3 +8,16 @@ nbconvert
 pandas>=3.0
 matplotlib>=3.11
 rapidfuzz>=3.14
+pytesseract>=0.3
+scikit-learn>=1.7   # dataset-profile.ipynb: t-SNE
+pyyaml
+# VietOCR: cài riêng, xem README
+#   uv pip install --python .venv/bin/python torch torchvision --index-url https://download.pytorch.org/whl/cpu
+#   uv pip install --python .venv/bin/python --no-deps vietocr==0.3.13
+einops
+gdown
+prefetch_generator
+# vlm-eval.ipynb (cần PyTorch như VietOCR)
+transformers>=4.57,<5   # remote code Vintern/PaddleOCR-VL chưa chạy được với 5.x
+accelerate
+timm

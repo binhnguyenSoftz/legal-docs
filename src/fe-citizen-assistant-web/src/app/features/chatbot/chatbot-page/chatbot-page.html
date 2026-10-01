@@ -1,0 +1,42 @@
+<a class="skip-link" href="#chat-question">Bỏ qua đến ô nhập câu hỏi</a>
+
+<app-government-header [organization]="organization" [user]="user" [navLinks]="navLinks" status="online" (menuToggle)="toggleSidebar()" />
+
+<div class="layout" [class.layout--collapsed]="sidebarCollapsed()">
+  @if (isMobile() && drawerOpen()) {
+    <button type="button" class="backdrop" aria-label="Đóng danh sách cuộc trò chuyện" tabindex="-1"
+            (click)="closeDrawer()"></button>
+  }
+
+  <aside class="sidebar" [class.sidebar--open]="drawerOpen()" [attr.aria-hidden]="isMobile() && !drawerOpen() ? 'true' : null"
+         [attr.inert]="isMobile() && !drawerOpen() ? '' : null"
+         [cdkTrapFocus]="isMobile() && drawerOpen()"
+         aria-label="Cuộc trò chuyện">
+    <app-chat-sidebar [groups]="conversations.groups()" [activeId]="conversations.activeId()"
+                      [query]="conversations.query()" [collapsed]="sidebarCollapsed()" [drawer]="isMobile()"
+                      (create)="newConversation()" (select)="selectConversation($event)"
+                      (remove)="removeConversation($event)" (queryChange)="conversations.setQuery($event)"
+                      (toggleCollapsed)="toggleSidebar()" (close)="closeDrawer()" />
+  </aside>
+
+  <main class="main" id="main">
+    <div class="scroll" #scroll (scroll)="onScroll(scroll)">
+      @if (conversations.active(); as conversation) {
+        <app-chat-conversation [conversation]="conversation" [thinking]="chat.isThinking()" [busy]="chat.isBusy()"
+                               (ask)="ask($event)" (retry)="retry($event)" (feedback)="feedback($event)" />
+      } @else {
+        <app-chat-welcome [organization]="organization" [groups]="suggestionGroups" [popular]="popularQuestions" [disabled]="chat.isBusy()"
+                          (ask)="ask($event)" />
+      }
+    </div>
+
+    <div class="composer-dock">
+      @if (showScrollButton() && conversations.active()) {
+        <button type="button" class="to-bottom" aria-label="Cuộn xuống tin nhắn mới nhất" (click)="scrollToBottom(scroll)">
+          <app-icon name="arrow-down" [size]="18" />
+        </button>
+      }
+      <app-chat-input [busy]="chat.isBusy()" (submitted)="send($event)" (stopped)="chat.cancel()" />
+    </div>
+  </main>
+</div>

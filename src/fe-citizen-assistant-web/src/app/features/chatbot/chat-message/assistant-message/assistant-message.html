@@ -1,0 +1,92 @@
+<app-assistant-avatar class="avatar" [size]="36" />
+
+<div class="message">
+  <div class="message__meta">
+    <h3 class="message__author">Trợ lý</h3>
+    <time [attr.datetime]="message().createdAt">{{ message().createdAt | date: 'HH:mm' }}</time>
+  </div>
+
+  @switch (message().status) {
+    @case ('error') {
+      <app-state-notice tone="error" icon="wifi-off" title="Không thể kết nối đến hệ thống"
+                        message="Vui lòng thử lại sau ít phút.">
+        <button type="button" class="btn btn--primary btn--sm" [disabled]="busy()" (click)="retry.emit(message())">
+          <app-icon name="refresh" [size]="16" />
+          Thử lại
+        </button>
+      </app-state-notice>
+    }
+
+    @case ('no-result') {
+      <app-state-notice icon="search-x" title="Không tìm thấy thông tin phù hợp"
+                        message="Hãy thử đặt câu hỏi theo cách khác hoặc cung cấp thêm thông tin, ví dụ tên thủ tục hoặc lĩnh vực bạn quan tâm." />
+    }
+
+    @default {
+      <div class="card">
+        @if (message().status === 'no-official-source' || !hasOfficialSource()) {
+          <app-state-notice class="card__warning" tone="warning" icon="warning" title="Thông tin tham khảo"
+                            message="Hiện chưa tìm thấy nguồn chính thức phù hợp cho câu hỏi này. Vui lòng liên hệ cơ quan có thẩm quyền để được xác nhận." />
+        }
+
+        <app-message-content [blocks]="message().blocks" [sources]="message().sources" />
+
+        @if (message().sources.length) {
+          <section class="sources" [attr.aria-label]="hasOfficialSource() ? 'Nguồn chính thức' : 'Nguồn tham khảo'">
+            <h4 class="sources__title">
+              <app-icon [name]="hasOfficialSource() ? 'shield-check' : 'info'" [size]="16" />
+              {{ hasOfficialSource() ? 'Nguồn chính thức' : 'Nguồn tham khảo' }}
+              <span class="sources__count">{{ message().sources.length }}</span>
+            </h4>
+            <div class="sources__list">
+              @for (source of visibleSources(); track source.id; let i = $index) {
+                <app-source-card [source]="source" [index]="i + 1" />
+              }
+            </div>
+            @if (hiddenSourceCount() > 0 || showAllSources()) {
+              <button type="button" class="btn btn--ghost btn--sm sources__more"
+                      [attr.aria-expanded]="showAllSources()" (click)="showAllSources.set(!showAllSources())">
+                {{ showAllSources() ? 'Thu gọn nguồn' : 'Xem thêm ' + hiddenSourceCount() + ' nguồn' }}
+                <app-icon name="chevron-down" [size]="14" [class.rotated]="showAllSources()" />
+              </button>
+            }
+          </section>
+        }
+
+        <div class="actions" role="group" aria-label="Thao tác với câu trả lời">
+          <button type="button" class="action" (click)="copy()" [matTooltip]="copied() ? 'Đã sao chép' : 'Sao chép'">
+            <app-icon [name]="copied() ? 'check' : 'copy'" [size]="16" />
+            <span>{{ copied() ? 'Đã sao chép' : 'Sao chép' }}</span>
+          </button>
+          <button type="button" class="action" (click)="download()" matTooltip="Tải xuống dạng văn bản">
+            <app-icon name="download" [size]="16" />
+            <span>Tải xuống</span>
+          </button>
+          <span class="actions__spacer"></span>
+          <span class="actions__label">Câu trả lời có hữu ích?</span>
+          <button type="button" class="action action--icon" [class.action--on]="message().feedback === 'up'"
+                  [attr.aria-pressed]="message().feedback === 'up'" aria-label="Hữu ích"
+                  matTooltip="Hữu ích" (click)="feedback.emit('up')">
+            <app-icon name="thumbs-up" [size]="16" />
+          </button>
+          <button type="button" class="action action--icon" [class.action--on]="message().feedback === 'down'"
+                  [attr.aria-pressed]="message().feedback === 'down'" aria-label="Chưa hữu ích"
+                  matTooltip="Chưa hữu ích" (click)="feedback.emit('down')">
+            <app-icon name="thumbs-down" [size]="16" />
+          </button>
+        </div>
+      </div>
+    }
+  }
+
+  @if (isLatest() && message().suggestions.length) {
+    <div class="suggestions">
+      <h4 class="suggestions__title">Câu hỏi liên quan</h4>
+      <div class="suggestions__list">
+        @for (q of message().suggestions; track q.id) {
+          <app-suggested-question [question]="q" [disabled]="busy()" (pick)="ask.emit($event)" />
+        }
+      </div>
+    </div>
+  }
+</div>

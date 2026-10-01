@@ -1,0 +1,48 @@
+<div class="sidebar__top">
+  <app-new-conversation-button class="sidebar__new" [compact]="collapsed()" (create)="create.emit()" />
+
+  @if (drawer()) {
+    <button type="button" class="sidebar__icon-btn" aria-label="Đóng danh sách" (click)="close.emit()">
+      <app-icon name="close" [size]="20" />
+    </button>
+  } @else if (!collapsed()) {
+    <button type="button" class="sidebar__icon-btn" aria-label="Thu gọn thanh bên"
+            matTooltip="Thu gọn" (click)="toggleCollapsed.emit()">
+      <app-icon name="panel-left" [size]="20" />
+    </button>
+  }
+</div>
+
+@if (collapsed()) {
+  <div class="rail">
+    <button type="button" class="sidebar__icon-btn" aria-label="Mở rộng thanh bên"
+            matTooltip="Mở rộng" matTooltipPosition="right" (click)="toggleCollapsed.emit()">
+      <app-icon name="panel-left" [size]="20" />
+    </button>
+    <button type="button" class="sidebar__icon-btn" aria-label="Tìm kiếm cuộc trò chuyện"
+            matTooltip="Tìm kiếm" matTooltipPosition="right" (click)="toggleCollapsed.emit()">
+      <app-icon name="search" [size]="20" />
+    </button>
+  </div>
+} @else {
+  <app-conversation-search class="sidebar__search" [query]="query()" (queryChange)="queryChange.emit($event)" />
+
+  <nav class="sidebar__history" aria-label="Lịch sử trò chuyện">
+    <app-conversation-list [groups]="groups()" [activeId]="activeId()" [searching]="!!query()"
+                           (select)="select.emit($event)" (remove)="remove.emit($event)" />
+  </nav>
+}
+
+<ul class="sidebar__footer">
+  @for (link of footerLinks; track link.label) {
+    <li>
+      <button type="button" class="footer-link" [attr.aria-label]="collapsed() ? link.label : null"
+              [matTooltip]="collapsed() ? link.label : ''" matTooltipPosition="right">
+        <app-icon [name]="link.icon" [size]="18" />
+        @if (!collapsed()) {
+          <span>{{ link.label }}</span>
+        }
+      </button>
+    </li>
+  }
+</ul>

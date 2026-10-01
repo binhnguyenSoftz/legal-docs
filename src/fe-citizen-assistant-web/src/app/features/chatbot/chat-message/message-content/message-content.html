@@ -1,0 +1,68 @@
+@for (block of blocks(); track $index) {
+  @switch (block.type) {
+    @case ('heading') {
+      <h3 class="heading">{{ block.text }}</h3>
+    }
+    @case ('paragraph') {
+      <p class="paragraph"><app-rich-text [text]="block.text" [sources]="sources()" /></p>
+    }
+    @case ('list') {
+      @if (block.ordered) {
+        <ol class="list list--ordered">
+          @for (item of block.items; track $index) {
+            <li><app-rich-text [text]="item" [sources]="sources()" /></li>
+          }
+        </ol>
+      } @else {
+        <ul class="list">
+          @for (item of block.items; track $index) {
+            <li><app-rich-text [text]="item" [sources]="sources()" /></li>
+          }
+        </ul>
+      }
+    }
+    @case ('table') {
+      <div class="table-wrap" tabindex="0" role="region" [attr.aria-label]="block.caption || 'Bảng thông tin'">
+        <table>
+          @if (block.caption) {
+            <caption>{{ block.caption }}</caption>
+          }
+          <thead>
+            <tr>
+              @for (h of block.headers; track $index) {
+                <th scope="col">{{ h }}</th>
+              }
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of block.rows; track $index) {
+              <tr>
+                @for (cell of row; track $index; let first = $first) {
+                  @if (first) {
+                    <th scope="row"><app-rich-text [text]="cell" [sources]="sources()" /></th>
+                  } @else {
+                    <td><app-rich-text [text]="cell" [sources]="sources()" /></td>
+                  }
+                }
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+    @case ('callout') {
+      <aside class="callout" [class]="'callout callout--' + block.tone">
+        <app-icon [name]="calloutIcons[block.tone]" [size]="18" class="callout__icon" />
+        <div>
+          @if (block.title) {
+            <strong class="callout__title">{{ block.title }}</strong>
+          }
+          <app-rich-text [text]="block.text" [sources]="sources()" />
+        </div>
+      </aside>
+    }
+    @case ('procedure') {
+      <app-procedure-card [procedure]="block.procedure" />
+    }
+  }
+}

@@ -52,3 +52,4 @@ Cần tầng mới thì bổ sung vào bảng này trước khi tạo module.
 | Module | Tầng | Mô tả | Tài liệu liên quan |
 |---|---|---|---|
 | [data-golden-set-generator](data-golden-set-generator/README.md) | `data` | Sinh hồ sơ hành chính giả có ground truth | `AIP-026`, `AIP-027` |
+| [fe-citizen-assistant-web](fe-citizen-assistant-web/README.md) | `fe` | Chatbot hỏi đáp bồi thường, giải tỏa khi thu hồi đất, Phòng Kinh tế, Hạ tầng và Đô thị phường Bình Đông (Angular SSR, dữ liệu mẫu) | `AIP-027` |

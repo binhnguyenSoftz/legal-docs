@@ -1,0 +1,30 @@
+@use 'app/shared/styles/tokens' as t;
+
+:host {
+  display: block;
+  padding: 28px 24px 8px;
+
+  @include t.mobile { padding: 16px 12px 8px; }
+}
+
+.log {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: var(--content-max);
+  margin: 0 auto;
+
+  @include t.mobile { gap: 18px; }
+}
+
+.item {
+  display: flex;
+  flex-direction: column;
+  // leave room under the sticky input when scrolled into view
+  scroll-margin-top: 16px;
+}
+
+.log__end {
+  height: 1px;
+  scroll-margin-bottom: 16px;
+}
